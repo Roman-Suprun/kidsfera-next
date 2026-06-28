@@ -20,6 +20,25 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Strapi Keep-Alive
+
+To keep a free Strapi instance awake, the Next.js server starts a background ping loop on boot.
+
+Set these environment variables:
+
+```bash
+STRAPI_URL=https://your-strapi-instance.example.com
+STRAPI_PING_PATH=/
+STRAPI_PING_INTERVAL_MS=240000
+```
+
+Notes:
+
+- `STRAPI_URL` is required.
+- `STRAPI_PING_PATH` is optional and defaults to `/`.
+- `STRAPI_PING_INTERVAL_MS` is optional and defaults to `240000` (4 minutes).
+- This works when your Next.js app runs as a long-lived Node server. If you deploy the frontend on a serverless platform, use an external cron/uptime service instead.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
