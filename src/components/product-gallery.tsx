@@ -1,0 +1,78 @@
+"use client";
+
+import { useState } from "react";
+
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+import type { ImageLink } from "@/lib/strapi";
+
+type Props = {
+  images: ImageLink[];
+  productName: string;
+};
+
+export function ProductGallery({ images, productName }: Props) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  if (!images.length) {
+    return (
+      <div className="soft-panel flex aspect-[4/3] items-center justify-center text-sm text-[var(--color-muted-foreground)]">
+        {productName}
+      </div>
+    );
+  }
+
+  const activeImage = images[activeIndex] ?? images[0];
+
+  return (
+    <div>
+      <div className="relative overflow-hidden rounded-[2rem] bg-[var(--color-panel)]">
+        <div className="aspect-[4/3]">
+          <img
+            alt={activeImage.alt}
+            className="h-full w-full object-cover"
+            src={activeImage.url}
+          />
+        </div>
+        {images.length > 1 ? (
+          <>
+            <button
+              className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[var(--color-foreground)] shadow"
+              onClick={() =>
+                setActiveIndex((current) => (current - 1 + images.length) % images.length)
+              }
+              type="button"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            <button
+              className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[var(--color-foreground)] shadow"
+              onClick={() => setActiveIndex((current) => (current + 1) % images.length)}
+              type="button"
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </>
+        ) : null}
+      </div>
+      {images.length > 1 ? (
+        <div className="mt-3 grid grid-cols-4 gap-3">
+          {images.map((image, index) => (
+            <button
+              key={`${image.url}-${index}`}
+              className={`overflow-hidden rounded-2xl border-2 ${
+                index === activeIndex
+                  ? "border-[var(--color-primary)]"
+                  : "border-transparent"
+              }`}
+              onClick={() => setActiveIndex(index)}
+              type="button"
+            >
+              <span className="sr-only">{image.alt}</span>
+              <img alt="" className="aspect-square h-full w-full object-cover" src={image.url} />
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
