@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import {
   ArrowRightIcon,
@@ -186,11 +187,13 @@ export default async function ProductPage({ params }: PageProps) {
                 className="card-surface overflow-hidden transition hover:-translate-y-1"
                 href={withLocale(typedLocale, `/products/${item.slug}`)}
               >
-                <div className="aspect-video bg-[var(--color-panel)]">
+                <div className="relative aspect-video bg-[var(--color-panel)]">
                   {item.gallery[0] ? (
-                    <img
+                    <Image
                       alt={item.gallery[0].alt}
-                      className="h-full w-full object-cover"
+                      className="object-cover"
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
                       src={item.gallery[0].url}
                     />
                   ) : null}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -313,9 +314,12 @@ export default async function HomePage({ params }: PageProps) {
         </div>
 
         <div className="relative h-[60vw] overflow-hidden bg-[var(--color-panel)] md:h-screen">
-          <img
+          <Image
             alt={page.heroQuoteAttribution ?? page.heroTitleLine1}
-            className="absolute inset-0 h-full w-full object-cover"
+            className="object-cover"
+            fill
+            priority
+            sizes="100vw"
             src={page.heroImageUrl}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
@@ -386,10 +390,12 @@ export default async function HomePage({ params }: PageProps) {
               href={withLocale(typedLocale, `/catalog?category=${category.slug}`)}
               className="group relative overflow-hidden rounded-2xl text-left"
             >
-              <div className="aspect-[4/3]">
-                <img
+              <div className="relative aspect-[4/3]">
+                <Image
                   alt={category.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(min-width: 768px) 33vw, 50vw"
                   src={category.imageUrl}
                 />
               </div>
@@ -528,9 +534,11 @@ export default async function HomePage({ params }: PageProps) {
                   index === 0 ? "aspect-square md:col-span-2 md:row-span-2" : "aspect-square"
                 }`}
               >
-                <img
+                <Image
                   alt={project.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes={index === 0 ? "(min-width: 768px) 50vw, 50vw" : "(min-width: 768px) 25vw, 50vw"}
                   src={project.imageUrl}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRightIcon } from "@/components/icons";
@@ -222,9 +223,11 @@ export function CatalogBrowser({
               >
                 <div className="relative aspect-[4/3] bg-[var(--color-panel)]">
                   {product.gallery[0] ? (
-                    <img
+                    <Image
                       alt={product.gallery[0].alt}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="object-cover"
+                      fill
+                      sizes="(min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
                       src={product.gallery[0].url}
                     />
                   ) : null}

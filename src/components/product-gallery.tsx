@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import type { ImageLink } from "@/lib/strapi";
@@ -26,10 +27,12 @@ export function ProductGallery({ images, productName }: Props) {
   return (
     <div>
       <div className="relative overflow-hidden rounded-[2rem] bg-[var(--color-panel)]">
-        <div className="aspect-[4/3]">
-          <img
+        <div className="relative aspect-[4/3]">
+          <Image
             alt={activeImage.alt}
-            className="h-full w-full object-cover"
+            className="object-cover"
+            fill
+            sizes="(min-width: 1024px) 50vw, 100vw"
             src={activeImage.url}
           />
         </div>
@@ -68,7 +71,15 @@ export function ProductGallery({ images, productName }: Props) {
               type="button"
             >
               <span className="sr-only">{image.alt}</span>
-              <img alt="" className="aspect-square h-full w-full object-cover" src={image.url} />
+              <span className="relative block aspect-square">
+                <Image
+                  alt=""
+                  className="object-cover"
+                  fill
+                  sizes="(min-width: 1024px) 8rem, 25vw"
+                  src={image.url}
+                />
+              </span>
             </button>
           ))}
         </div>

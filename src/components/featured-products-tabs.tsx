@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRightIcon } from "@/components/icons";
@@ -114,9 +115,11 @@ export function FeaturedProductsTabs({ locale, eyebrow, title, items }: Props) {
 
           <div className="relative min-h-[18rem] bg-[var(--color-panel)] md:min-h-[29rem]">
             {activeImage ? (
-              <img
+              <Image
                 alt={activeImage.alt}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="object-cover"
+                fill
+                sizes="(min-width: 768px) 50vw, 100vw"
                 src={activeImage.url}
               />
             ) : null}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import { ArrowRightIcon } from "@/components/icons";
 import { buildMetadata } from "@/lib/metadata";
@@ -90,10 +91,12 @@ export default async function CategoriesPage({ params }: PageProps) {
               className="group relative overflow-hidden rounded-[2rem] border border-[var(--color-border)]"
               href={withLocale(typedLocale, `/catalog?category=${category.slug}`)}
             >
-              <div className="aspect-[4/3]">
-                <img
+              <div className="relative aspect-[4/3]">
+                <Image
                   alt={category.name}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  className="object-cover transition duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
                   src={category.imageUrl}
                 />
               </div>
