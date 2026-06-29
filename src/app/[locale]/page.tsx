@@ -252,6 +252,18 @@ export default async function HomePage({ params }: PageProps) {
     note: contactFormCopy[typedLocale].note,
   };
   const previewCategories = categories.slice(0, 6);
+  const productCountByCategory = new Map<string, number>();
+
+  for (const product of products) {
+    const categorySlug = product.category?.slug;
+
+    if (!categorySlug) {
+      continue;
+    }
+
+    productCountByCategory.set(categorySlug, (productCountByCategory.get(categorySlug) ?? 0) + 1);
+  }
+
   const galleryProjects = projects.slice(0, 4);
   const projectOptions = formCopy.projectOptions
     .split("\n")
@@ -408,7 +420,7 @@ export default async function HomePage({ params }: PageProps) {
                   {category.name}
                 </p>
                 <p className="mt-0.5 text-xs text-white/50">
-                  {products.filter((product) => product.category?.slug === category.slug).length} items
+                  {productCountByCategory.get(category.slug) ?? 0} items
                 </p>
               </div>
             </Link>

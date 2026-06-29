@@ -3,12 +3,13 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 
-import { ArrowRightIcon } from "@/components/icons";
+import { ArrowRightIcon, ChevronRightIcon } from "@/components/icons";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getCategories,
+  getCatalogPage,
   getCategoriesPage,
   getProducts,
 } from "@/lib/strapi";
@@ -49,8 +50,9 @@ export default async function CategoriesPage({ params }: PageProps) {
   }
 
   const typedLocale = locale as Locale;
-  const [page, categories, products] = await Promise.all([
+  const [page, catalogPage, categories, products] = await Promise.all([
     getCategoriesPage(typedLocale),
+    getCatalogPage(typedLocale),
     getCategories(typedLocale),
     getProducts(typedLocale),
   ]);
@@ -59,65 +61,107 @@ export default async function CategoriesPage({ params }: PageProps) {
     notFound();
   }
 
+  const productCountByCategory = new Map<string, number>();
+
+  for (const product of products) {
+    const categorySlug = product.category?.slug;
+
+    if (!categorySlug) {
+      continue;
+    }
+
+    productCountByCategory.set(categorySlug, (productCountByCategory.get(categorySlug) ?? 0) + 1);
+  }
+
+  const itemsLabel = catalogPage?.itemsLabel ?? "items";
+
   return (
-    <section className="site-container section-space">
-      <div className="max-w-3xl">
-        <p className="eyebrow">{page.eyebrow}</p>
-        <h1 className="display-title whitespace-pre-line">{page.title}</h1>
-        <p className="mt-6 text-lg leading-8 text-[var(--color-muted-foreground)]">
-          {page.description}
-        </p>
-      </div>
+    <div className="min-h-screen bg-[var(--color-background)] pt-16">
+      <section className="site-container py-16">
+        <div className="mb-14">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
+            {page.eyebrow}
+          </p>
+          <h1
+            className="mb-4 max-w-[12ch] whitespace-pre-line text-4xl font-bold leading-[1.02] md:text-6xl"
+            style={{ fontFamily: "'Unbounded', sans-serif" }}
+          >
+            {page.title}
+          </h1>
+          <p className="max-w-2xl text-lg text-[var(--color-muted-foreground)]">
+            {page.description}
+          </p>
+        </div>
 
-      <div className="mt-10">
-        <Link className="card-surface flex items-center justify-between gap-6 p-6" href={withLocale(typedLocale, "/catalog")}>
-          <div>
-            <div className="brand-title text-xl">{page.allProductsLabel}</div>
-            <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-              {products.length} items
-            </p>
+        <Link
+          className="group mb-8 flex w-full items-center justify-between rounded-2xl bg-[var(--color-surface-strong)] p-6 text-white transition-colors hover:bg-[#2a2520]"
+          href={withLocale(typedLocale, "/catalog")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary)] text-xl">
+              <span aria-hidden="true">🏆</span>
+            </div>
+            <div className="text-left">
+              <p
+                className="text-base font-bold"
+                style={{ fontFamily: "'Unbounded', sans-serif" }}
+              >
+                {page.allProductsLabel}
+              </p>
+              <p className="mt-0.5 text-sm text-white/50">
+                {products.length} {itemsLabel}
+              </p>
+            </div>
           </div>
-          <ArrowRightIcon className="h-5 w-5" />
+          <ArrowRightIcon className="h-5 w-5 text-white/40 transition-all group-hover:translate-x-1 group-hover:text-white" />
         </Link>
-      </div>
 
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {categories.map((category) => {
-          const count = products.filter((product) => product.category?.slug === category.slug).length;
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {categories.map((category) => {
+            const count = productCountByCategory.get(category.slug) ?? 0;
 
-          return (
-            <Link
-              key={category.slug}
-              className="group relative overflow-hidden rounded-[2rem] border border-[var(--color-border)]"
-              href={withLocale(typedLocale, `/catalog?category=${category.slug}`)}
-            >
-              <div className="relative aspect-[4/3]">
+            return (
+              <Link
+                key={category.slug}
+                className="group relative aspect-[4/3] overflow-hidden rounded-3xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                href={withLocale(typedLocale, `/catalog?category=${category.slug}`)}
+              >
                 <Image
                   alt={category.name}
-                  className="object-cover transition duration-500 group-hover:scale-105"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   fill
-                  sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   src={category.imageUrl}
                 />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <div className="mb-3 inline-flex rounded-full bg-white/16 px-3 py-1 text-xs font-bold backdrop-blur">
-                  {count}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                <div className="absolute right-4 top-4">
+                  <span
+                    className="rounded-full px-2.5 py-1 text-xs font-bold text-white"
+                    style={{ backgroundColor: category.themeColor }}
+                  >
+                    {count}
+                  </span>
                 </div>
-                <h2 className="brand-title text-2xl">{category.name}</h2>
-                <p className="mt-2 max-w-xs text-sm leading-6 text-white/72">
-                  {category.cardDescription}
-                </p>
-                <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">
-                  {page.viewCatalogLabel}
-                  <ArrowRightIcon className="h-4 w-4" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h2
+                    className="mb-1 text-xl font-bold text-white"
+                    style={{ fontFamily: "'Unbounded', sans-serif" }}
+                  >
+                    {category.name}
+                  </h2>
+                  <p className="line-clamp-2 text-xs leading-relaxed text-white/60">
+                    {category.cardDescription}
+                  </p>
+                  <div className="mt-3 flex items-center gap-1 text-white/40 transition-colors group-hover:text-white/80">
+                    <span className="text-xs font-medium">{page.viewCatalogLabel}</span>
+                    <ChevronRightIcon className="h-3.5 w-3.5" />
+                  </div>
                 </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+    </div>
   );
 }
