@@ -73,6 +73,10 @@
     letter-spacing: -0.045em;
   }
 
+  .font-display {
+    font-family: var(--font-display), "Avenir Next Condensed", "Arial Rounded MT Bold", ui-rounded, sans-serif;
+  }
+
   .display-title {
     font-family: var(--font-display), "Avenir Next Condensed", "Arial Rounded MT Bold", ui-rounded, sans-serif;
     font-size: clamp(2.25rem, 5.5vw, 3.95rem);

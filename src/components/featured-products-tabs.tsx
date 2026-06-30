@@ -59,10 +59,7 @@ export function FeaturedProductsTabs({ locale, eyebrow, title, items }: Props) {
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
           {eyebrow}
         </p>
-        <h2
-          className="whitespace-pre-line text-4xl font-bold md:text-5xl"
-          style={{ fontFamily: "'Unbounded', sans-serif" }}
-        >
+        <h2 className="font-display whitespace-pre-line text-4xl font-bold md:text-5xl">
           {title}
         </h2>
       </div>
@@ -92,10 +89,7 @@ export function FeaturedProductsTabs({ locale, eyebrow, title, items }: Props) {
               >
                 {activeItem.badge}
               </span>
-              <h3
-                className="mb-2 text-3xl font-bold md:text-4xl"
-                style={{ fontFamily: "'Unbounded', sans-serif" }}
-              >
+              <h3 className="font-display mb-2 text-3xl font-bold md:text-4xl">
                 {activeItem.title}
               </h3>
               <p className="mb-6 text-base font-medium opacity-80">{activeItem.tagline}</p>

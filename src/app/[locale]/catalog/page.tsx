@@ -67,10 +67,7 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
               {page.filterByLabel}
             </p>
-            <h1
-              className="text-3xl font-bold md:text-4xl"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <h1 className="font-display text-3xl font-bold md:text-4xl">
               {page.title}
             </h1>
           </div>

@@ -281,10 +281,7 @@ export default async function HomePage({ params }: PageProps) {
             {page.heroEyebrow}
           </div>
 
-          <h1
-            className="mb-6 text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl"
-            style={{ fontFamily: "'Unbounded', sans-serif" }}
-          >
+          <h1 className="font-display mb-6 text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl">
             {page.heroTitleLine1}
             <br />
             <span className="text-[var(--color-primary)]">{page.heroTitleLine2}</span>
@@ -315,10 +312,7 @@ export default async function HomePage({ params }: PageProps) {
           <div className="mt-14 grid grid-cols-2 gap-6">
             {page.stats.slice(0, 2).map((item) => (
               <div key={`${item.value}-${item.label}`}>
-                <div
-                  className="text-3xl font-bold"
-                  style={{ fontFamily: "'Unbounded', sans-serif" }}
-                >
+                <div className="font-display text-3xl font-bold">
                   {item.value}
                 </div>
                 <div className="mt-1 text-sm text-[var(--color-muted-foreground)]">{item.label}</div>
@@ -363,10 +357,7 @@ export default async function HomePage({ params }: PageProps) {
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-6 md:grid-cols-4">
           {page.stats.map((item) => (
             <div key={`${item.value}-${item.label}`} className="text-center">
-              <div
-                className="text-4xl font-bold text-white"
-                style={{ fontFamily: "'Unbounded', sans-serif" }}
-              >
+              <div className="font-display text-4xl font-bold text-white">
                 {item.value}
               </div>
               <div className="mt-1 text-sm text-white/50">{item.label}</div>
@@ -381,10 +372,7 @@ export default async function HomePage({ params }: PageProps) {
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
               {categoriesPage?.eyebrow ?? "All Categories"}
             </p>
-            <h2
-              className="text-4xl font-bold md:text-5xl"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <h2 className="font-display text-4xl font-bold md:text-5xl">
               {page.productsSectionEyebrow}
             </h2>
           </div>
@@ -416,8 +404,8 @@ export default async function HomePage({ params }: PageProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
                 <p
-                  className="text-sm font-bold text-white"
-                  style={{ fontFamily: "'Unbounded', sans-serif", fontSize: "0.75rem" }}
+                  className="font-display text-sm font-bold text-white"
+                  style={{ fontSize: "0.75rem" }}
                 >
                   {category.name}
                 </p>
@@ -458,10 +446,7 @@ export default async function HomePage({ params }: PageProps) {
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
             {page.processEyebrow}
           </p>
-          <h2
-            className="whitespace-pre-line text-4xl font-bold md:text-5xl"
-            style={{ fontFamily: "'Unbounded', sans-serif" }}
-          >
+          <h2 className="font-display whitespace-pre-line text-4xl font-bold md:text-5xl">
             {page.processTitle}
           </h2>
         </div>
@@ -478,16 +463,10 @@ export default async function HomePage({ params }: PageProps) {
                     : "bg-[var(--color-primary)]"
               }`}
             >
-              <div
-                className="mb-4 text-5xl font-black leading-none text-white/20"
-                style={{ fontFamily: "'Unbounded', sans-serif" }}
-              >
+              <div className="font-display mb-4 text-5xl font-black leading-none text-white/20">
                 {step.stepNumber}
               </div>
-              <h3
-                className="mb-3 text-lg font-bold text-white"
-                style={{ fontFamily: "'Unbounded', sans-serif" }}
-              >
+              <h3 className="font-display mb-3 text-lg font-bold text-white">
                 {step.title}
               </h3>
               <p className="text-sm leading-relaxed text-white/75">{step.description}</p>
@@ -497,10 +476,7 @@ export default async function HomePage({ params }: PageProps) {
 
         <div className="mt-8 flex flex-col items-center justify-between gap-6 rounded-3xl bg-[var(--color-accent)] p-8 md:flex-row">
           <div>
-            <h3
-              className="text-xl font-bold text-[var(--color-surface-strong)]"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <h3 className="font-display text-xl font-bold text-[var(--color-surface-strong)]">
               {page.processTimelineTitle}
             </h3>
             <p className="mt-1 text-sm text-[var(--color-surface-strong)]/70">
@@ -532,10 +508,7 @@ export default async function HomePage({ params }: PageProps) {
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">
               {page.projectsEyebrow}
             </p>
-            <h2
-              className="whitespace-pre-line text-4xl font-bold text-white md:text-5xl"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <h2 className="font-display whitespace-pre-line text-4xl font-bold text-white md:text-5xl">
               {page.projectsTitle}
             </h2>
           </div>
@@ -582,10 +555,7 @@ export default async function HomePage({ params }: PageProps) {
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
             {page.testimonialsEyebrow ?? testimonialFallback.eyebrow}
           </p>
-          <h2
-            className="max-w-3xl whitespace-pre-line text-4xl font-bold md:text-5xl"
-            style={{ fontFamily: "'Unbounded', sans-serif" }}
-          >
+          <h2 className="font-display max-w-3xl whitespace-pre-line text-4xl font-bold md:text-5xl">
             {page.testimonialsTitle ?? testimonialFallback.title}
           </h2>
         </div>
@@ -656,10 +626,7 @@ export default async function HomePage({ params }: PageProps) {
         </div>
         <div className="relative flex flex-col items-center justify-between gap-8 px-8 py-16 md:flex-row md:px-16 md:py-20">
           <div>
-            <h2
-              className="mb-3 whitespace-pre-line text-3xl font-bold text-white md:text-5xl"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <h2 className="font-display mb-3 whitespace-pre-line text-3xl font-bold text-white md:text-5xl">
               {page.ctaHeading}
             </h2>
             <p className="max-w-md text-base text-white/70">{page.ctaSubtitle}</p>
@@ -687,10 +654,7 @@ export default async function HomePage({ params }: PageProps) {
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
               {page.contactEyebrow}
             </p>
-            <h2
-              className="mb-6 whitespace-pre-line text-4xl font-bold md:text-5xl"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <h2 className="font-display mb-6 whitespace-pre-line text-4xl font-bold md:text-5xl">
               {page.contactTitle}
             </h2>
             <p className="mb-10 leading-relaxed text-[var(--color-muted-foreground)]">

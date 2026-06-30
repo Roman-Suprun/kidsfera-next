@@ -242,8 +242,8 @@ export function CatalogBrowser({
                     </span>
                   ) : null}
                   <h3
-                    className="mb-1 mt-4 text-base font-bold"
-                    style={{ fontFamily: "'Unbounded', sans-serif", fontSize: "0.85rem" }}
+                    className="font-display mb-1 mt-4 text-base font-bold"
+                    style={{ fontSize: "0.85rem" }}
                   >
                     {product.name}
                   </h3>

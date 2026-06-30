@@ -82,10 +82,7 @@ export default async function CategoriesPage({ params }: PageProps) {
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
             {page.eyebrow}
           </p>
-          <h1
-            className="mb-4 max-w-[12ch] whitespace-pre-line text-4xl font-bold leading-[1.02] md:text-6xl"
-            style={{ fontFamily: "'Unbounded', sans-serif" }}
-          >
+          <h1 className="font-display mb-4 max-w-[12ch] whitespace-pre-line text-4xl font-bold leading-[1.02] md:text-6xl">
             {page.title}
           </h1>
           <p className="max-w-2xl text-lg text-[var(--color-muted-foreground)]">
@@ -102,10 +99,7 @@ export default async function CategoriesPage({ params }: PageProps) {
               <span aria-hidden="true">🏆</span>
             </div>
             <div className="text-left">
-              <p
-                className="text-base font-bold"
-                style={{ fontFamily: "'Unbounded', sans-serif" }}
-              >
+              <p className="font-display text-base font-bold">
                 {page.allProductsLabel}
               </p>
               <p className="mt-0.5 text-sm text-white/50">
@@ -143,10 +137,7 @@ export default async function CategoriesPage({ params }: PageProps) {
                   </span>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h2
-                    className="mb-1 text-xl font-bold text-white"
-                    style={{ fontFamily: "'Unbounded', sans-serif" }}
-                  >
+                  <h2 className="font-display mb-1 text-xl font-bold text-white">
                     {category.name}
                   </h2>
                   <p className="line-clamp-2 text-xs leading-relaxed text-white/60">

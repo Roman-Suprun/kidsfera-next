@@ -17,10 +17,7 @@ function renderBrandName(name: string) {
   const cutIndex = Math.max(1, name.length - 5);
 
   return (
-    <span
-      className="text-lg font-bold tracking-tight"
-      style={{ fontFamily: "'Unbounded', sans-serif" }}
-    >
+    <span className="font-display text-lg font-bold tracking-tight">
       {name.slice(0, cutIndex)}
       <span className="text-[var(--color-primary)]">{name.slice(cutIndex)}</span>
     </span>
@@ -40,10 +37,7 @@ export function SiteHeader({ locale, settings }: Props) {
       <div className="site-container flex h-16 items-center justify-between gap-4">
         <Link href={homeHref} className="flex shrink-0 items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary)]">
-            <span
-              className="text-sm font-bold text-white"
-              style={{ fontFamily: "'Unbounded', sans-serif" }}
-            >
+            <span className="font-display text-sm font-bold text-white">
               K
             </span>
           </div>
