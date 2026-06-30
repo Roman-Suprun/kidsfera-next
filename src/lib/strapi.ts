@@ -30,6 +30,8 @@ type StrapiMedia = {
   url?: string | null;
   alternativeText?: string | null;
   name?: string | null;
+  hash?: string | null;
+  updatedAt?: string | null;
 };
 
 export type StatItem = {
@@ -486,13 +488,25 @@ function mapProduct(value: unknown): Product | null {
   };
 }
 
-function buildAssetUrl(url: string) {
+function buildAssetUrl(url: string, version?: string | number | null) {
   if (/^https?:\/\//i.test(url)) {
-    return url;
+    const absoluteUrl = new URL(url);
+
+    if (version) {
+      absoluteUrl.searchParams.set("v", String(version));
+    }
+
+    return absoluteUrl.toString();
   }
 
   const normalizedPath = url.startsWith("/") ? url : `/${url}`;
-  return `/api/strapi-media${normalizedPath}`;
+  const assetUrl = new URL(`/api/strapi-media${normalizedPath}`, "http://localhost");
+
+  if (version) {
+    assetUrl.searchParams.set("v", String(version));
+  }
+
+  return `${assetUrl.pathname}${assetUrl.search}`;
 }
 
 function resolveMediaUrl(value: unknown) {
@@ -501,9 +515,10 @@ function resolveMediaUrl(value: unknown) {
   }
 
   const media = value as StrapiMedia;
+  const version = media.hash ?? media.updatedAt ?? media.id ?? null;
 
   return typeof media.url === "string" && media.url.length > 0
-    ? buildAssetUrl(media.url)
+    ? buildAssetUrl(media.url, version)
     : null;
 }
 
