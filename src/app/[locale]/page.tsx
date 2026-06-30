@@ -14,6 +14,8 @@ import {
   WrenchIcon,
   ZapIcon,
 } from "@/components/icons";
+import { MailtoContactForm } from "@/components/mailto-contact-form";
+import { MailtoLink } from "@/components/mailto-link";
 import { isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 import {
@@ -699,11 +701,7 @@ export default async function HomePage({ params }: PageProps) {
               {page.contactItems.map((item) => {
                 const Icon = contactIcons[item.type] ?? PhoneIcon;
                 const href =
-                  item.type === "email"
-                    ? `mailto:${item.value}`
-                    : item.type === "phone"
-                      ? `tel:${item.value}`
-                      : undefined;
+                  item.type === "phone" ? `tel:${item.value}` : undefined;
 
                 return (
                   <div key={`${item.type}-${item.value}`} className="flex items-start gap-4">
@@ -712,7 +710,15 @@ export default async function HomePage({ params }: PageProps) {
                     </div>
                     <div>
                       <p className="text-xs text-[var(--color-muted-foreground)]">{item.label}</p>
-                      {href ? (
+                      {item.type === "email" ? (
+                        <MailtoLink
+                          email={item.value}
+                          className="mt-0.5 block text-left text-sm font-medium"
+                          ariaLabel={`Email ${item.value}`}
+                        >
+                          {item.value}
+                        </MailtoLink>
+                      ) : href ? (
                         <a className="mt-0.5 block text-sm font-medium" href={href}>
                           {item.value}
                         </a>
@@ -726,86 +732,11 @@ export default async function HomePage({ params }: PageProps) {
             </div>
           </div>
 
-          <form
-            action={`mailto:${settings.contactEmail}`}
-            method="post"
-            encType="text/plain"
-            className="rounded-3xl border border-[var(--color-border)] bg-white p-8"
-          >
-            <div className="flex flex-col gap-5">
-              <div className="grid grid-cols-2 gap-4">
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                    {formCopy.firstNameLabel}
-                  </span>
-                  <input
-                    name="firstName"
-                    placeholder={formCopy.firstNamePlaceholder}
-                    className="rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
-                </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                    {formCopy.lastNameLabel}
-                  </span>
-                  <input
-                    name="lastName"
-                    placeholder={formCopy.lastNamePlaceholder}
-                    className="rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
-                </label>
-              </div>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                  {formCopy.emailLabel}
-                </span>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder={formCopy.emailPlaceholder}
-                  className="rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                  {formCopy.projectTypeLabel}
-                </span>
-                <select
-                  name="projectType"
-                  defaultValue=""
-                  className="cursor-pointer appearance-none rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                >
-                  <option value="" disabled>
-                    {formCopy.projectTypePlaceholder}
-                  </option>
-                  {projectOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                  {formCopy.messageLabel}
-                </span>
-                <textarea
-                  name="message"
-                  rows={4}
-                  placeholder={formCopy.messagePlaceholder}
-                  className="resize-none rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
-              </label>
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] py-3.5 font-semibold text-white transition-colors hover:bg-[#e03d00]"
-              >
-                {formCopy.submitLabel}
-                <ArrowRightIcon className="h-[18px] w-[18px]" />
-              </button>
-              <p className="text-center text-xs text-[var(--color-muted-foreground)]">{formCopy.note}</p>
-            </div>
-          </form>
+          <MailtoContactForm
+            email={settings.contactEmail}
+            formCopy={formCopy}
+            projectOptions={projectOptions}
+          />
         </div>
       </section>
     </>

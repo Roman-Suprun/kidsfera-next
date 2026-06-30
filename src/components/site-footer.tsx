@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
 import type { SiteSettings } from "@/lib/strapi";
+import { MailtoLink } from "@/components/mailto-link";
 
 type Props = {
   locale: Locale;
@@ -84,9 +85,13 @@ export function SiteFooter({ locale, settings }: Props) {
             <div>
               <p className="mb-3 text-xs uppercase tracking-widest text-white/30">Contact</p>
               <div className="grid gap-1.5">
-                <a className="footer-link text-white/60" href={`mailto:${settings.contactEmail}`}>
+                <MailtoLink
+                  email={settings.contactEmail}
+                  className="footer-link text-left text-white/60"
+                  ariaLabel={`Email ${settings.contactEmail}`}
+                >
                   {settings.contactEmail}
-                </a>
+                </MailtoLink>
                 <a className="footer-link text-white/60" href={`tel:${settings.contactPhone}`}>
                   {settings.contactPhone}
                 </a>
