@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
+import { Inter, Unbounded } from "next/font/google";
 
 import "./globals.css";
+
+const bodyFont = Inter({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  variable: "--font-body",
+});
+
+const displayFont = Unbounded({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
   title: "Kidsfera",
@@ -13,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html
+      lang="en"
+      className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
+    >
       <body className="min-h-full">{children}</body>
     </html>
   );
