@@ -6,6 +6,11 @@ const projectRoot = path.resolve(__dirname);
 
 const nextConfig: NextConfig = {
   images: {
+    localPatterns: [
+      {
+        pathname: "/api/strapi-media/**",
+      },
+    ],
     minimumCacheTTL: 14400,
   },
   outputFileTracingRoot: projectRoot,
