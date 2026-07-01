@@ -75,14 +75,11 @@ const contactFormCopy: Record<
     firstName: string;
     lastName: string;
     email: string;
-    projectType: string;
     message: string;
     firstNamePlaceholder: string;
     lastNamePlaceholder: string;
     emailPlaceholder: string;
-    projectTypePlaceholder: string;
     messagePlaceholder: string;
-    projectOptions: string[];
     submit: string;
     note: string;
   }
@@ -91,21 +88,11 @@ const contactFormCopy: Record<
     firstName: "First Name",
     lastName: "Last Name",
     email: "Email",
-    projectType: "Project Type",
     message: "Tell us about your project",
     firstNamePlaceholder: "Anna",
     lastNamePlaceholder: "Kowalska",
     emailPlaceholder: "anna@kidsfera.eu",
-    projectTypePlaceholder: "Select a category...",
     messagePlaceholder: "Site area, location, budget, opening date...",
-    projectOptions: [
-      "Maze Labyrinth",
-      "Outdoor Playground",
-      "Climbing Wall",
-      "Soft Play",
-      "Indoor Park",
-      "Custom Project",
-    ],
     submit: "Send Enquiry",
     note: "We respond within 24 hours · No spam, ever",
   },
@@ -113,21 +100,11 @@ const contactFormCopy: Record<
     firstName: "Ім'я",
     lastName: "Прізвище",
     email: "Email",
-    projectType: "Тип проєкту",
     message: "Розкажіть про ваш проєкт",
     firstNamePlaceholder: "Анна",
     lastNamePlaceholder: "Коваленко",
     emailPlaceholder: "anna@kidsfera.ua",
-    projectTypePlaceholder: "Оберіть категорію...",
     messagePlaceholder: "Площа, місто, бюджет, дата відкриття...",
-    projectOptions: [
-      "Лабіринт",
-      "Вуличний майданчик",
-      "Скелодром",
-      "М'яка зона",
-      "Критий парк",
-      "Індивідуальний проєкт",
-    ],
     submit: "Надіслати запит",
     note: "Відповідаємо протягом 24 годин · Без спаму",
   },
@@ -135,21 +112,11 @@ const contactFormCopy: Record<
     firstName: "Имя",
     lastName: "Фамилия",
     email: "Email",
-    projectType: "Тип проекта",
     message: "Расскажите о вашем проекте",
     firstNamePlaceholder: "Анна",
     lastNamePlaceholder: "Коваленко",
     emailPlaceholder: "anna@kidsfera.ru",
-    projectTypePlaceholder: "Выберите категорию...",
     messagePlaceholder: "Площадь, город, бюджет, дата открытия...",
-    projectOptions: [
-      "Лабиринт",
-      "Уличная площадка",
-      "Скалодром",
-      "Мягкая зона",
-      "Крытый парк",
-      "Индивидуальный проект",
-    ],
     submit: "Отправить запрос",
     note: "Отвечаем в течение 24 часов · Без спама",
   },
@@ -157,21 +124,11 @@ const contactFormCopy: Record<
     firstName: "Imię",
     lastName: "Nazwisko",
     email: "Email",
-    projectType: "Typ projektu",
     message: "Opowiedz o swoim projekcie",
     firstNamePlaceholder: "Anna",
     lastNamePlaceholder: "Kowalska",
     emailPlaceholder: "anna@kidsfera.pl",
-    projectTypePlaceholder: "Wybierz kategorię...",
     messagePlaceholder: "Powierzchnia, lokalizacja, budżet, data otwarcia...",
-    projectOptions: [
-      "Labirynt",
-      "Plac zabaw",
-      "Ścianka wspinaczkowa",
-      "Strefa soft play",
-      "Park kryty",
-      "Projekt indywidualny",
-    ],
     submit: "Wyślij zapytanie",
     note: "Odpowiadamy w ciągu 24 godzin · Zero spamu",
   },
@@ -242,14 +199,11 @@ export default async function HomePage({ params }: PageProps) {
     firstNameLabel: contactFormCopy[typedLocale].firstName,
     lastNameLabel: contactFormCopy[typedLocale].lastName,
     emailLabel: contactFormCopy[typedLocale].email,
-    projectTypeLabel: contactFormCopy[typedLocale].projectType,
     messageLabel: contactFormCopy[typedLocale].message,
     firstNamePlaceholder: contactFormCopy[typedLocale].firstNamePlaceholder,
     lastNamePlaceholder: contactFormCopy[typedLocale].lastNamePlaceholder,
     emailPlaceholder: contactFormCopy[typedLocale].emailPlaceholder,
-    projectTypePlaceholder: contactFormCopy[typedLocale].projectTypePlaceholder,
     messagePlaceholder: contactFormCopy[typedLocale].messagePlaceholder,
-    projectOptions: contactFormCopy[typedLocale].projectOptions.join("\n"),
     submitLabel: contactFormCopy[typedLocale].submit,
     note: contactFormCopy[typedLocale].note,
   };
@@ -267,11 +221,6 @@ export default async function HomePage({ params }: PageProps) {
   }
 
   const galleryProjects = projects.slice(0, 4);
-  const projectOptions = formCopy.projectOptions
-    .split("\n")
-    .map((option) => option.trim())
-    .filter(Boolean);
-
   return (
     <>
       <section className="grid min-h-screen items-center pt-16 md:grid-cols-2">
@@ -699,7 +648,6 @@ export default async function HomePage({ params }: PageProps) {
           <MailtoContactForm
             email={settings.contactEmail}
             formCopy={formCopy}
-            projectOptions={projectOptions}
           />
         </div>
       </section>

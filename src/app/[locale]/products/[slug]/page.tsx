@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
 } from "@/components/icons";
 import { ProductGallery } from "@/components/product-gallery";
+import { QuoteRequestLink } from "@/components/quote-request-link";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
@@ -15,11 +16,73 @@ import {
   getProductBySlug,
   getProductPageLabels,
   getProducts,
+  getSiteSettings,
 } from "@/lib/strapi";
 
 type PageProps = {
   params: Promise<{ locale: string; slug: string }>;
 };
+
+const homeBreadcrumbLabels: Record<Locale, string> = {
+  en: "Home",
+  uk: "Головна",
+  ru: "Главная",
+  pl: "Start",
+};
+
+const quotePrefillCopy: Record<
+  Locale,
+  {
+    intro: string;
+    productLabel: string;
+    categoryLabel: string;
+    priceLabel: string;
+  }
+> = {
+  en: {
+    intro: "Hi, I'd like to request a quote for this product.",
+    productLabel: "Product",
+    categoryLabel: "Category",
+    priceLabel: "Budget range",
+  },
+  uk: {
+    intro: "Вітаю, хочу отримати комерційну пропозицію для цього продукту.",
+    productLabel: "Продукт",
+    categoryLabel: "Категорія",
+    priceLabel: "Орієнтовний бюджет",
+  },
+  ru: {
+    intro: "Здравствуйте, хочу запросить коммерческое предложение для этого продукта.",
+    productLabel: "Продукт",
+    categoryLabel: "Категория",
+    priceLabel: "Ориентир по бюджету",
+  },
+  pl: {
+    intro: "Dzień dobry, chciałbym otrzymać ofertę dla tego produktu.",
+    productLabel: "Produkt",
+    categoryLabel: "Kategoria",
+    priceLabel: "Orientacyjny budżet",
+  },
+};
+
+function buildQuotePrefillMessage(
+  locale: Locale,
+  product: Awaited<ReturnType<typeof getProductBySlug>>,
+) {
+  if (!product) {
+    return "";
+  }
+
+  const copy = quotePrefillCopy[locale];
+
+  return [
+    copy.intro,
+    "",
+    `${copy.productLabel}: ${product.name}`,
+    `${copy.categoryLabel}: ${product.category?.name ?? "-"}`,
+    `${copy.priceLabel}: ${product.priceLabel}`,
+  ].join("\n");
+}
 
 export async function generateStaticParams() {
   return [];
@@ -53,13 +116,14 @@ export default async function ProductPage({ params }: PageProps) {
   }
 
   const typedLocale = locale as Locale;
-  const [product, labels, products] = await Promise.all([
+  const [product, labels, products, settings] = await Promise.all([
     getProductBySlug(typedLocale, slug),
     getProductPageLabels(typedLocale),
     getProducts(typedLocale),
+    getSiteSettings(typedLocale),
   ]);
 
-  if (!product || !labels) {
+  if (!product || !labels || !settings) {
     notFound();
   }
 
@@ -68,13 +132,14 @@ export default async function ProductPage({ params }: PageProps) {
       (item) => item.slug !== product.slug && item.category?.slug === product.category?.slug,
     )
     .slice(0, 3);
+  const quotePrefillMessage = buildQuotePrefillMessage(typedLocale, product);
 
   return (
     <section className="site-container section-space">
       <div className="mb-8 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
-        <Link href={withLocale(typedLocale)}>{typedLocale.toUpperCase()}</Link>
+        <Link href={withLocale(typedLocale)}>{homeBreadcrumbLabels[typedLocale]}</Link>
         <ChevronRightIcon className="h-4 w-4" />
-        <Link href={withLocale(typedLocale, "/catalog")}>Catalog</Link>
+        <Link href={withLocale(typedLocale, "/catalog")}>{settings.navCatalogLabel}</Link>
         {product.category ? (
           <>
             <ChevronRightIcon className="h-4 w-4" />
@@ -159,10 +224,14 @@ export default async function ProductPage({ params }: PageProps) {
           ) : null}
 
           <div className="mt-10 flex flex-wrap gap-3">
-            <Link className="btn-primary" href={withLocale(typedLocale, "/catalog")}>
+            <QuoteRequestLink
+              className="btn-primary"
+              locale={typedLocale}
+              message={quotePrefillMessage}
+            >
               {labels.requestQuoteLabel}
               <ArrowRightIcon className="h-4 w-4" />
-            </Link>
+            </QuoteRequestLink>
             <Link
               className="btn-secondary"
               href={

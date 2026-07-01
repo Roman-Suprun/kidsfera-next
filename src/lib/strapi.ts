@@ -84,14 +84,11 @@ export type ContactForm = {
   firstNameLabel: string;
   lastNameLabel: string;
   emailLabel: string;
-  projectTypeLabel: string;
   messageLabel: string;
   firstNamePlaceholder: string;
   lastNamePlaceholder: string;
   emailPlaceholder: string;
-  projectTypePlaceholder: string;
   messagePlaceholder: string;
-  projectOptions: string;
   submitLabel: string;
   note: string;
 };

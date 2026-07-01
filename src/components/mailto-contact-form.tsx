@@ -1,14 +1,14 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { ArrowRightIcon } from "@/components/icons";
+import { CONTACT_PREFILL_STORAGE_KEY } from "@/lib/contact-prefill";
 import type { ContactForm } from "@/lib/strapi";
 
 type Props = {
   email: string;
   formCopy: ContactForm;
-  projectOptions: string[];
 };
 
 function getValue(formData: FormData, key: string) {
@@ -21,7 +21,22 @@ function buildMailtoUrl(email: string, subject: string, body: string) {
   return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-export function MailtoContactForm({ email, formCopy, projectOptions }: Props) {
+export function MailtoContactForm({ email, formCopy }: Props) {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    try {
+      const prefilledMessage = window.sessionStorage.getItem(CONTACT_PREFILL_STORAGE_KEY) ?? "";
+
+      if (prefilledMessage) {
+        setMessage(prefilledMessage);
+        window.sessionStorage.removeItem(CONTACT_PREFILL_STORAGE_KEY);
+      }
+    } catch {
+      // Ignore storage access issues and keep the form empty.
+    }
+  }, []);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -29,7 +44,6 @@ export function MailtoContactForm({ email, formCopy, projectOptions }: Props) {
     const firstName = getValue(formData, "firstName");
     const lastName = getValue(formData, "lastName");
     const senderEmail = getValue(formData, "email");
-    const projectType = getValue(formData, "projectType");
     const message = getValue(formData, "message");
     const fullName = [firstName, lastName].filter(Boolean).join(" ");
     const subject = fullName ? `Kidsfera enquiry from ${fullName}` : "Kidsfera enquiry";
@@ -37,7 +51,6 @@ export function MailtoContactForm({ email, formCopy, projectOptions }: Props) {
       `${formCopy.firstNameLabel}: ${firstName || "-"}`,
       `${formCopy.lastNameLabel}: ${lastName || "-"}`,
       `${formCopy.emailLabel}: ${senderEmail || "-"}`,
-      `${formCopy.projectTypeLabel}: ${projectType || "-"}`,
       "",
       `${formCopy.messageLabel}:`,
       message || "-",
@@ -87,30 +100,13 @@ export function MailtoContactForm({ email, formCopy, projectOptions }: Props) {
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-            {formCopy.projectTypeLabel}
-          </span>
-          <select
-            name="projectType"
-            defaultValue=""
-            className="cursor-pointer appearance-none rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          >
-            <option value="" disabled>
-              {formCopy.projectTypePlaceholder}
-            </option>
-            {projectOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
             {formCopy.messageLabel}
           </span>
           <textarea
             name="message"
             rows={4}
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
             placeholder={formCopy.messagePlaceholder}
             className="resize-none rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           />
