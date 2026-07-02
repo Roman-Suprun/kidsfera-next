@@ -54,7 +54,7 @@ export function SiteFooter({ locale, settings }: Props) {
                 <Link className="footer-link text-white/60" href={withLocale(locale, "/catalog")}>
                   {settings.navCatalogLabel}
                 </Link>
-                <Link className="footer-link text-white/60" href={`${homeHref}#projects`}>
+                <Link className="footer-link text-white/60" href={withLocale(locale, "/projects")}>
                   {settings.navProjectsLabel}
                 </Link>
                 <Link className="footer-link text-white/60" href={`${homeHref}#process`}>

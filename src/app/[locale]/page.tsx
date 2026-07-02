@@ -464,11 +464,12 @@ export default async function HomePage({ params }: PageProps) {
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {galleryProjects.map((project, index) => (
-              <article
+              <Link
                 key={project.slug}
                 className={`group relative cursor-pointer overflow-hidden rounded-2xl ${
                   index === 0 ? "aspect-square md:col-span-2 md:row-span-2" : "aspect-square"
                 }`}
+                href={withLocale(typedLocale, `/projects/${project.slug}`)}
               >
                 <Image
                   alt={project.title}
@@ -484,12 +485,12 @@ export default async function HomePage({ params }: PageProps) {
                   </span>
                   <p className="text-sm font-semibold text-white">{project.title}</p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
           <div className="mt-8 text-center">
             <Link
-              href={withLocale(typedLocale, "/catalog")}
+              href={withLocale(typedLocale, "/projects")}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 font-semibold text-[var(--color-surface-strong)] transition-colors hover:bg-[var(--color-background)]"
             >
               {page.projectsCtaLabel}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
@@ -13,6 +13,10 @@ type Props = {
 
 export function ProductGallery({ images, productName }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [images]);
 
   if (!images.length) {
     return (
@@ -54,11 +58,25 @@ export function ProductGallery({ images, productName }: Props) {
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
+            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {images.map((image, index) => (
+                <button
+                  key={`${image.url}-${index}-dot`}
+                  className={`h-2 rounded-full transition-all ${
+                    index === activeIndex ? "w-5 bg-white" : "w-2 bg-white/50"
+                  }`}
+                  onClick={() => setActiveIndex(index)}
+                  type="button"
+                >
+                  <span className="sr-only">{image.alt}</span>
+                </button>
+              ))}
+            </div>
           </>
         ) : null}
       </div>
       {images.length > 1 ? (
-        <div className="mt-3 grid grid-cols-4 gap-3">
+        <div className="mt-3 grid grid-cols-4 gap-2">
           {images.map((image, index) => (
             <button
               key={`${image.url}-${index}`}

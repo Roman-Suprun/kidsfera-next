@@ -51,7 +51,7 @@ export function SiteHeader({ locale, settings }: Props) {
           <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/catalog")}>
             {settings.navCatalogLabel}
           </Link>
-          <Link className="nav-link whitespace-nowrap" href={`${homeHref}#projects`}>
+          <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/projects")}>
             {settings.navProjectsLabel}
           </Link>
           <Link className="nav-link whitespace-nowrap" href={`${homeHref}#process`}>
@@ -115,7 +115,7 @@ export function SiteHeader({ locale, settings }: Props) {
                 </Link>
                 <Link
                   className="nav-link"
-                  href={`${homeHref}#projects`}
+                  href={withLocale(locale, "/projects")}
                   onClick={closeMobileMenu}
                 >
                   {settings.navProjectsLabel}

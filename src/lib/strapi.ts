@@ -102,6 +102,12 @@ export type ImageLink = {
   alt: string;
 };
 
+export type ProjectTestimonial = {
+  quote: string;
+  author: string;
+  role: string;
+};
+
 export type SiteSettings = {
   siteName: string;
   siteTagline?: string | null;
@@ -243,7 +249,17 @@ export type Project = {
   title: string;
   slug: string;
   subtitle: string;
+  description: string;
+  location: string;
+  clientName: string;
+  area: string;
+  yearLabel: string;
+  themeColor?: string | null;
+  countryFlag?: string | null;
   imageUrl: string;
+  gallery: ImageLink[];
+  testimonial?: ProjectTestimonial | null;
+  usedProducts: Product[];
   projectType: string;
   sortOrder?: number | null;
   featured?: boolean | null;
@@ -290,8 +306,11 @@ type RawProduct = Omit<Product, "gallery" | "seo" | "category"> & {
   category?: RawCategory | null;
 };
 
-type RawProject = Omit<Project, "imageUrl"> & {
+type RawProject = Omit<Project, "imageUrl" | "gallery" | "usedProducts" | "projectType"> & {
   image?: StrapiMedia | null;
+  gallery?: RawImageLink[];
+  usedProducts?: RawProduct[];
+  projectType?: RawCategory | null;
 };
 
 export type Testimonial = {
@@ -598,7 +617,14 @@ function mapProject(value: unknown): Project | null {
 
   return {
     ...project,
+    projectType: mapCategory(project.projectType)?.name ?? "",
     imageUrl: resolveMediaUrl(project.image) ?? "",
+    gallery: (project.gallery ?? [])
+      .map((entry) => mapImageLink(entry))
+      .filter((entry): entry is ImageLink => Boolean(entry)),
+    usedProducts: (project.usedProducts ?? [])
+      .map((entry) => mapProduct(entry))
+      .filter((entry): entry is Product => Boolean(entry)),
   };
 }
 
@@ -740,6 +766,10 @@ export const getProducts = cache(async (locale: Locale) => {
 export const getProjects = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
   setPopulate(query, "populate[image]", true);
+  setPopulate(query, "populate[projectType][populate][0]", "image");
+  setPopulate(query, "populate[gallery][populate][0]", "image");
+  setPopulate(query, "populate[testimonial][populate][0]", false);
+  setPopulate(query, "populate[usedProducts][populate][gallery][populate][0]", "image");
   query.append("sort[0]", "sortOrder:asc");
   query.append("sort[1]", "title:asc");
 
@@ -747,6 +777,12 @@ export const getProjects = cache(async (locale: Locale) => {
 
   return normalizeCollection<RawProject>(payload).map((entry) => mapProject(entry)!);
 });
+
+export async function getProjectBySlug(locale: Locale, slug: string) {
+  const projects = await getProjects(locale);
+
+  return projects.find((project) => project.slug === slug) ?? null;
+}
 
 export const getTestimonials = cache(async (locale: Locale) => {
   const query = baseQuery(locale);

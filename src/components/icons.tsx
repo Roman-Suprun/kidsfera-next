@@ -42,6 +42,43 @@ export function ChevronLeftIcon(props: IconProps) {
   );
 }
 
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="m6 9 6 6 6-6" />
+    </BaseIcon>
+  );
+}
+
+export function ChevronUpIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="m18 15-6-6-6 6" />
+    </BaseIcon>
+  );
+}
+
+export function SlidersHorizontalIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M3 6h18" />
+      <path d="M3 12h18" />
+      <path d="M3 18h18" />
+      <circle cx="8" cy="6" r="2" fill="currentColor" stroke="none" />
+      <circle cx="14" cy="12" r="2" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="18" r="2" fill="currentColor" stroke="none" />
+    </BaseIcon>
+  );
+}
+
+export function StarIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="m12 3.6 2.58 5.24 5.78.84-4.18 4.08.99 5.76L12 16.8 6.83 19.52l.99-5.76L3.64 9.68l5.78-.84L12 3.6Z" />
+    </BaseIcon>
+  );
+}
+
 export function PhoneIcon(props: IconProps) {
   return (
     <BaseIcon {...props}>

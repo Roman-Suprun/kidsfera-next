@@ -4,7 +4,12 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRightIcon } from "@/components/icons";
+import {
+  ArrowRightIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  SlidersHorizontalIcon,
+} from "@/components/icons";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
 import type { CatalogPage, Category, Product } from "@/lib/strapi";
@@ -23,6 +28,20 @@ const ageGroups = [
   { id: "4-8", min: 4, max: 8 },
   { id: "8-16", min: 8, max: 16 },
 ] as const;
+
+const agePrefixByLocale: Record<Locale, string> = {
+  en: "Ages",
+  uk: "Вік",
+  ru: "Возраст",
+  pl: "Wiek",
+};
+
+const yearsSuffixByLocale: Record<Locale, string> = {
+  en: "yrs",
+  uk: "р.",
+  ru: "лет",
+  pl: "lat",
+};
 
 function parseAgeRange(input: string) {
   const clean = input.replace(/[^0-9-–]/g, "");
@@ -127,7 +146,9 @@ export function CatalogBrowser({
                 onClick={() => setAgeFilter(group.id)}
                 type="button"
               >
-                {group.id === "all" ? page.allLabel : `${group.id} yrs`}
+                {group.id === "all"
+                  ? page.allLabel
+                  : `${group.id} ${yearsSuffixByLocale[locale]}`}
               </button>
             ))}
           </div>
@@ -141,7 +162,13 @@ export function CatalogBrowser({
             onClick={() => setShowFilters((value) => !value)}
             type="button"
           >
+            <SlidersHorizontalIcon className="h-4 w-4" />
             {page.filtersLabel}
+            {showFilters ? (
+              <ChevronUpIcon className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDownIcon className="h-3.5 w-3.5" />
+            )}
           </button>
           {showFilters ? (
             <div className="mt-4 grid grid-cols-2 gap-6 rounded-2xl border border-[var(--color-border)] bg-white p-4">
@@ -200,7 +227,9 @@ export function CatalogBrowser({
                       onClick={() => setAgeFilter(group.id)}
                       type="button"
                     >
-                      {group.id === "all" ? page.allLabel : `${group.id} yrs`}
+                      {group.id === "all"
+                        ? page.allLabel
+                        : `${group.id} ${yearsSuffixByLocale[locale]}`}
                     </button>
                   ))}
                 </div>
@@ -208,47 +237,62 @@ export function CatalogBrowser({
             </div>
           ) : null}
         </div>
-        <div className="mb-6 flex items-center justify-between gap-4">
+
+        <div className="mb-6 flex items-center justify-end gap-4">
           <p className="text-sm text-[var(--color-muted-foreground)]">
             {filteredProducts.length} {page.itemsLabel}
           </p>
         </div>
 
         {filteredProducts.length ? (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product) => (
               <article
                 key={product.slug}
-                className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white text-left transition-all hover:border-[color:rgba(255,69,0,0.3)] hover:shadow-lg"
+                className="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white text-left transition-all hover:border-[color:rgba(255,69,0,0.3)] hover:shadow-lg focus-within:ring-2 focus-within:ring-[var(--color-primary)]"
               >
                 <div className="relative aspect-[4/3] bg-[var(--color-panel)]">
                   {product.gallery[0] ? (
                     <Image
                       alt={product.gallery[0].alt}
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                       fill
                       sizes="(min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
                       src={product.gallery[0].url}
                     />
                   ) : null}
+                  {product.category ? (
+                    <div className="absolute left-3 top-3">
+                      <span
+                        className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
+                        style={{ backgroundColor: product.category.themeColor }}
+                      >
+                        {product.category.name}
+                      </span>
+                    </div>
+                  ) : null}
+                  {product.certifications.length ? (
+                    <div className="absolute right-3 top-3 flex gap-1">
+                      {product.certifications.slice(0, 2).map((badge) => (
+                        <span
+                          key={badge.label}
+                          className="inline-flex rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold text-[var(--color-foreground)]"
+                        >
+                          {badge.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="p-5">
-                  {product.category ? (
-                    <span
-                      className="inline-flex rounded-full px-3 py-1 text-[10px] font-bold text-white"
-                      style={{ backgroundColor: product.category.themeColor }}
-                    >
-                      {product.category.name}
-                    </span>
-                  ) : null}
                   <h3
-                    className="font-display mb-1 mt-4 text-base font-bold"
+                    className="font-display mb-1 text-base font-bold"
                     style={{ fontSize: "0.85rem" }}
                   >
                     {product.name}
                   </h3>
                   <p className="mb-3 text-xs text-[var(--color-muted-foreground)]">
-                    Ages {product.ageRange}
+                    {agePrefixByLocale[locale]} {product.ageRange}
                   </p>
                   <div className="mt-5 flex items-center justify-between gap-4">
                     <span className="text-sm font-bold text-[var(--color-primary)]">
