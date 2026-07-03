@@ -94,7 +94,7 @@ function buildQuotePrefillMessage(
     copy.intro,
     "",
     `${copy.productLabel}: ${product.name}`,
-    `${copy.categoryLabel}: ${product.category?.name ?? "-"}`,
+    `${copy.categoryLabel}: ${product.categories.map((category) => category.name).join(", ") || "-"}`,
     `${copy.priceLabel}: ${product.priceLabel}`,
   ].join("\n");
 }
@@ -144,7 +144,11 @@ export default async function ProductPage({ params }: PageProps) {
 
   const relatedProducts = products
     .filter(
-      (item) => item.slug !== product.slug && item.category?.slug === product.category?.slug,
+      (item) =>
+        item.slug !== product.slug &&
+        item.categories.some((category) =>
+          product.categories.some((productCategory) => productCategory.slug === category.slug),
+        ),
     )
     .slice(0, 3);
   const quotePrefillMessage = buildQuotePrefillMessage(typedLocale, product);
@@ -185,14 +189,15 @@ export default async function ProductPage({ params }: PageProps) {
 
           <div className="flex flex-col">
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              {product.category ? (
+              {product.categories.map((category) => (
                 <span
+                  key={`${product.slug}-${category.slug}`}
                   className="inline-flex rounded-full px-3 py-1 text-xs font-bold text-white"
-                  style={{ backgroundColor: product.category.themeColor }}
+                  style={{ backgroundColor: category.themeColor }}
                 >
-                  {product.category.name}
+                  {category.name}
                 </span>
-              ) : null}
+              ))}
               {product.certifications.map((certification) => (
                 <span
                   key={certification.label}

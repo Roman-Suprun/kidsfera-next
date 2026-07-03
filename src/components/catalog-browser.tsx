@@ -67,7 +67,10 @@ export function CatalogBrowser({
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      if (categoryFilter && product.category?.slug !== categoryFilter) {
+      if (
+        categoryFilter &&
+        !product.categories.some((category) => category.slug === categoryFilter)
+      ) {
         return false;
       }
 
@@ -261,14 +264,17 @@ export function CatalogBrowser({
                       src={product.gallery[0].url}
                     />
                   ) : null}
-                  {product.category ? (
-                    <div className="absolute left-3 top-3">
-                      <span
-                        className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
-                        style={{ backgroundColor: product.category.themeColor }}
-                      >
-                        {product.category.name}
-                      </span>
+                  {product.categories.length ? (
+                    <div className="absolute left-3 top-3 flex max-w-[70%] flex-wrap gap-1">
+                      {product.categories.slice(0, 2).map((category) => (
+                        <span
+                          key={`${product.slug}-${category.slug}`}
+                          className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
+                          style={{ backgroundColor: category.themeColor }}
+                        >
+                          {category.name}
+                        </span>
+                      ))}
                     </div>
                   ) : null}
                   {product.certifications.length ? (

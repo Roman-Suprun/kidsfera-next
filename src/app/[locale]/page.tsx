@@ -211,13 +211,12 @@ export default async function HomePage({ params }: PageProps) {
   const productCountByCategory = new Map<string, number>();
 
   for (const product of products) {
-    const categorySlug = product.category?.slug;
-
-    if (!categorySlug) {
-      continue;
+    for (const category of product.categories) {
+      productCountByCategory.set(
+        category.slug,
+        (productCountByCategory.get(category.slug) ?? 0) + 1,
+      );
     }
-
-    productCountByCategory.set(categorySlug, (productCountByCategory.get(categorySlug) ?? 0) + 1);
   }
 
   const galleryProjects = projects.slice(0, 4);
@@ -480,9 +479,19 @@ export default async function HomePage({ params }: PageProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="mb-1.5 inline-block rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-[10px] font-bold text-white">
-                    {project.projectType}
-                  </span>
+                  {project.categories.length ? (
+                    <div className="mb-1.5 flex flex-wrap gap-1">
+                      {project.categories.slice(0, 2).map((category) => (
+                        <span
+                          key={`${project.slug}-${category.slug}`}
+                          className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                          style={{ backgroundColor: category.themeColor }}
+                        >
+                          {category.name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                   <p className="text-sm font-semibold text-white">{project.title}</p>
                 </div>
               </Link>

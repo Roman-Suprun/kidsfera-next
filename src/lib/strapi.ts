@@ -240,6 +240,7 @@ export type Product = {
   sortOrder?: number | null;
   featured?: boolean | null;
   seo?: Seo | null;
+  categories: Category[];
   category?: Category | null;
 };
 
@@ -260,6 +261,7 @@ export type Project = {
   gallery: ImageLink[];
   testimonial?: ProjectTestimonial | null;
   usedProducts: Product[];
+  categories: Category[];
   projectType: string;
   sortOrder?: number | null;
   featured?: boolean | null;
@@ -300,17 +302,17 @@ type RawImageLink = Omit<ImageLink, "url"> & {
   image?: StrapiMedia | null;
 };
 
-type RawProduct = Omit<Product, "gallery" | "seo" | "category"> & {
+type RawProduct = Omit<Product, "gallery" | "seo" | "category" | "categories"> & {
   gallery?: RawImageLink[];
   seo?: RawSeo | null;
-  category?: RawCategory | null;
+  category?: RawCategory | RawCategory[] | null;
 };
 
-type RawProject = Omit<Project, "imageUrl" | "gallery" | "usedProducts" | "projectType"> & {
+type RawProject = Omit<Project, "imageUrl" | "gallery" | "usedProducts" | "projectType" | "categories"> & {
   image?: StrapiMedia | null;
   gallery?: RawImageLink[];
   usedProducts?: RawProduct[];
-  projectType?: RawCategory | null;
+  projectType?: RawCategory | RawCategory[] | null;
 };
 
 export type Testimonial = {
@@ -482,12 +484,24 @@ function mapCategory(value: unknown): Category | null {
   };
 }
 
+function mapCategoryCollection(value: unknown): Category[] {
+  if (Array.isArray(value)) {
+    return value.map((entry) => mapCategory(entry)).filter((entry): entry is Category => Boolean(entry));
+  }
+
+  const singleCategory = mapCategory(value);
+
+  return singleCategory ? [singleCategory] : [];
+}
+
 function mapProduct(value: unknown): Product | null {
   const product = value as RawProduct | null;
 
   if (!product) {
     return null;
   }
+
+  const categories = mapCategoryCollection(product.category);
 
   return {
     ...product,
@@ -500,7 +514,8 @@ function mapProduct(value: unknown): Product | null {
           .filter((entry): entry is ImageLink => Boolean(entry))
       : [],
     seo: mapSeo(product.seo),
-    category: mapCategory(product.category),
+    categories,
+    category: categories[0] ?? null,
   };
 }
 
@@ -615,9 +630,12 @@ function mapProject(value: unknown): Project | null {
     return null;
   }
 
+  const categories = mapCategoryCollection(project.projectType);
+
   return {
     ...project,
-    projectType: mapCategory(project.projectType)?.name ?? "",
+    categories,
+    projectType: categories.map((category) => category.name).join(", "),
     imageUrl: resolveMediaUrl(project.image) ?? "",
     gallery: (project.gallery ?? [])
       .map((entry) => mapImageLink(entry))

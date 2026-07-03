@@ -64,13 +64,12 @@ export default async function CategoriesPage({ params }: PageProps) {
   const productCountByCategory = new Map<string, number>();
 
   for (const product of products) {
-    const categorySlug = product.category?.slug;
-
-    if (!categorySlug) {
-      continue;
+    for (const category of product.categories) {
+      productCountByCategory.set(
+        category.slug,
+        (productCountByCategory.get(category.slug) ?? 0) + 1,
+      );
     }
-
-    productCountByCategory.set(categorySlug, (productCountByCategory.get(categorySlug) ?? 0) + 1);
   }
 
   const itemsLabel = catalogPage?.itemsLabel ?? "items";

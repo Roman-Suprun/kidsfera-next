@@ -23,18 +23,22 @@ export function ProjectsBrowser({ locale, projects }: Props) {
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
   const projectTypes = useMemo(
-    () => Array.from(new Set(projects.map((project) => project.projectType))),
+    () =>
+      Array.from(
+        new Map(
+          projects.flatMap((project) =>
+            project.categories.map((category) => [category.slug, category] as const),
+          ),
+        ).values(),
+      ),
     [projects],
   );
   const projectTypeColors = useMemo(
     () =>
       new Map(
-        projects.map((project) => [
-          project.projectType,
-          project.themeColor ?? inferProjectThemeColor(project.projectType),
-        ]),
+        projectTypes.map((category) => [category.slug, category.themeColor]),
       ),
-    [projects],
+    [projectTypes],
   );
 
   const filteredProjects = useMemo(() => {
@@ -42,7 +46,9 @@ export function ProjectsBrowser({ locale, projects }: Props) {
       return projects;
     }
 
-    return projects.filter((project) => project.projectType === typeFilter);
+    return projects.filter((project) =>
+      project.categories.some((category) => category.slug === typeFilter),
+    );
   }, [projects, typeFilter]);
 
   return (
@@ -61,22 +67,22 @@ export function ProjectsBrowser({ locale, projects }: Props) {
         </button>
         {projectTypes.map((projectType) => {
           const color =
-            projectTypeColors.get(projectType) ?? inferProjectThemeColor(projectType);
-          const isActive = typeFilter === projectType;
+            projectTypeColors.get(projectType.slug) ?? inferProjectThemeColor(projectType.name);
+          const isActive = typeFilter === projectType.slug;
 
           return (
             <button
-              key={projectType}
+              key={projectType.slug}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                 isActive
                   ? "text-white"
                   : "bg-[var(--color-panel)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-panel-strong)]"
               }`}
-              onClick={() => setTypeFilter(isActive ? null : projectType)}
+              onClick={() => setTypeFilter(isActive ? null : projectType.slug)}
               style={isActive ? { backgroundColor: color } : undefined}
               type="button"
             >
-              {projectType}
+              {projectType.name}
             </button>
           );
         })}
@@ -84,7 +90,10 @@ export function ProjectsBrowser({ locale, projects }: Props) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filteredProjects.map((project) => {
-          const themeColor = project.themeColor ?? inferProjectThemeColor(project.projectType);
+          const themeColor =
+            project.themeColor ??
+            project.categories[0]?.themeColor ??
+            inferProjectThemeColor(project.projectType);
 
           return (
             <Link
@@ -103,13 +112,16 @@ export function ProjectsBrowser({ locale, projects }: Props) {
                   />
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
-                <div className="absolute left-3 top-3">
-                  <span
-                    className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
-                    style={{ backgroundColor: themeColor }}
-                  >
-                    {project.projectType}
-                  </span>
+                <div className="absolute left-3 top-3 flex max-w-[70%] flex-wrap gap-1">
+                  {project.categories.slice(0, 2).map((category) => (
+                    <span
+                      key={`${project.slug}-${category.slug}`}
+                      className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
+                      style={{ backgroundColor: category.themeColor }}
+                    >
+                      {category.name}
+                    </span>
+                  ))}
                 </div>
                 {project.countryFlag ? (
                   <div className="absolute right-3 top-3 text-2xl">{project.countryFlag}</div>

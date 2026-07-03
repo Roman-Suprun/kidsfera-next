@@ -98,10 +98,19 @@ export default async function ProjectPage({ params }: PageProps) {
   }
 
   const copy = projectPageCopy[typedLocale];
-  const themeColor = project.themeColor ?? inferProjectThemeColor(project.projectType);
+  const themeColor =
+    project.themeColor ??
+    project.categories[0]?.themeColor ??
+    inferProjectThemeColor(project.projectType);
   const usedProducts = project.usedProducts ?? [];
   const relatedProjects = allProjects
-    .filter((item) => item.slug !== project.slug)
+    .filter(
+      (item) =>
+        item.slug !== project.slug &&
+        item.categories.some((category) =>
+          project.categories.some((projectCategory) => projectCategory.slug === category.slug),
+        ),
+    )
     .slice(0, 3);
   const primaryGallery =
     project.gallery.length > 0
@@ -152,12 +161,15 @@ export default async function ProjectPage({ params }: PageProps) {
         <div className="grid gap-12 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="mb-4 flex flex-wrap gap-2">
-              <span
-                className="inline-flex rounded-full px-3 py-1 text-xs font-bold text-white"
-                style={{ backgroundColor: themeColor }}
-              >
-                {project.projectType}
-              </span>
+              {project.categories.map((category) => (
+                <span
+                  key={`${project.slug}-${category.slug}`}
+                  className="inline-flex rounded-full px-3 py-1 text-xs font-bold text-white"
+                  style={{ backgroundColor: category.themeColor }}
+                >
+                  {category.name}
+                </span>
+              ))}
               {project.yearLabel ? (
                 <span className="rounded-full bg-[var(--color-panel)] px-2.5 py-1 text-xs font-medium text-[var(--color-muted-foreground)]">
                   {project.yearLabel}
@@ -254,7 +266,9 @@ export default async function ProjectPage({ params }: PageProps) {
                   <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
                     {copy.projectType}
                   </span>
-                  <span className="text-sm font-medium">{project.projectType}</span>
+                  <span className="text-sm font-medium">
+                    {project.categories.map((category) => category.name).join(", ") || project.projectType}
+                  </span>
                 </div>
                 {project.clientName ? (
                   <div className="flex flex-col gap-0.5">
@@ -312,7 +326,9 @@ export default async function ProjectPage({ params }: PageProps) {
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               {relatedProjects.map((relatedProject) => {
                 const relatedColor =
-                  relatedProject.themeColor ?? inferProjectThemeColor(relatedProject.projectType);
+                  relatedProject.themeColor ??
+                  relatedProject.categories[0]?.themeColor ??
+                  inferProjectThemeColor(relatedProject.projectType);
 
                 return (
                   <Link
@@ -332,12 +348,17 @@ export default async function ProjectPage({ params }: PageProps) {
                       ) : null}
                     </div>
                     <div className="p-4">
-                      <span
-                        className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
-                        style={{ backgroundColor: relatedColor }}
-                      >
-                        {relatedProject.projectType}
-                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {relatedProject.categories.slice(0, 2).map((category) => (
+                          <span
+                            key={`${relatedProject.slug}-${category.slug}`}
+                            className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold text-white"
+                            style={{ backgroundColor: category.themeColor ?? relatedColor }}
+                          >
+                            {category.name}
+                          </span>
+                        ))}
+                      </div>
                       <h3 className="font-display mt-3 text-sm font-bold">
                         {relatedProject.title}
                       </h3>
