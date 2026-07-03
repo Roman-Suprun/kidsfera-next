@@ -744,7 +744,6 @@ export const getCatalogPage = cache(async (locale: Locale) => {
 
 export const getProductPageLabels = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
-  // setPopulate(query, "populate[seo][populate][0]", "ogImage");
 
   const payload = await strapiFetch<StrapiEnvelope<ProductPageLabels | null>>(
     "/api/product-page",

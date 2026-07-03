@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
         pathname: "/api/strapi-media/**",
       },
     ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "kidsfera-strapi-media.s3.eu-west-1.amazonaws.com",
+        pathname: "/**",
+      },
+    ],
     minimumCacheTTL: 14400,
   },
   outputFileTracingRoot: projectRoot,
