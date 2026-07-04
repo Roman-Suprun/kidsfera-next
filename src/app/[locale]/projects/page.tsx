@@ -50,7 +50,7 @@ export default async function ProjectsPage({ params }: PageProps) {
     "https://images.unsplash.com/photo-1759776050712-2b7880af8cd4?w=1600&h=600&fit=crop&auto=format";
 
   return (
-    <section className="min-h-screen bg-[var(--color-background)] pt-16">
+    <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative h-72 overflow-hidden bg-[var(--color-surface-strong)] md:h-96">
         <img
           alt={copy.eyebrow}

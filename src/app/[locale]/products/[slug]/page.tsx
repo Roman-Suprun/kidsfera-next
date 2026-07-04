@@ -156,7 +156,7 @@ export default async function ProductPage({ params }: PageProps) {
   const ratingCopy = productRatingCopy[typedLocale];
 
   return (
-    <section className="min-h-screen bg-[var(--color-background)] pt-16">
+    <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="mb-8 flex flex-wrap items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)]">
           <Link className="transition-colors hover:text-[var(--color-foreground)]" href={withLocale(typedLocale)}>

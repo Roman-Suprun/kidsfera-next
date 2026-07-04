@@ -60,7 +60,7 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
   }
 
   return (
-    <section className="min-h-screen bg-[var(--color-background)] pt-16">
+    <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>

@@ -108,6 +108,21 @@ export type ProjectTestimonial = {
   role: string;
 };
 
+export type SocialLink = {
+  label: string;
+  href: string;
+  platform:
+    | "facebook"
+    | "instagram"
+    | "linkedin"
+    | "youtube"
+    | "telegram"
+    | "whatsapp"
+    | "tiktok"
+    | "x"
+    | "custom";
+};
+
 export type SiteSettings = {
   siteName: string;
   siteTagline?: string | null;
@@ -120,9 +135,13 @@ export type SiteSettings = {
   navCtaLabel: string;
   footerDescription?: string | null;
   footerCopyright?: string | null;
+  businessHoursLabel?: string | null;
+  businessHoursPrimary?: string | null;
+  businessHoursSecondary?: string | null;
   contactEmail: string;
   contactPhone: string;
   contactAddress: string;
+  socialLinks: SocialLink[];
 };
 
 export type HomePage = {
@@ -401,7 +420,16 @@ function normalizeSingle<T>(payload: StrapiEnvelope<StrapiEntity | null>) {
   return normalizeValue<T | null>(data as StrapiEntity | null);
 }
 
-async function strapiFetch<T>(path: string, query?: URLSearchParams): Promise<T> {
+type StrapiFetchOptions = {
+  cache?: RequestCache;
+  revalidate?: number;
+};
+
+async function strapiFetch<T>(
+  path: string,
+  query?: URLSearchParams,
+  options?: StrapiFetchOptions,
+): Promise<T> {
   const requestPaths = [path, ...(singleTypeFallbacks[path] ?? [])];
   let lastError: Error | null = null;
 
@@ -410,7 +438,10 @@ async function strapiFetch<T>(path: string, query?: URLSearchParams): Promise<T>
 
     try {
       response = await fetch(buildUrl(requestPath, query), {
-        next: { revalidate: REVALIDATE_SECONDS },
+        ...(options?.cache ? { cache: options.cache } : {}),
+        ...(!options?.cache
+          ? { next: { revalidate: options?.revalidate ?? REVALIDATE_SECONDS } }
+          : {}),
         headers: {
           "Content-Type": "application/json",
         },
@@ -682,16 +713,19 @@ function mapSiteSettings(value: unknown): SiteSettings | null {
   return {
     ...settings,
     defaultSeo: mapSeo(settings.defaultSeo),
+    socialLinks: Array.isArray(settings.socialLinks) ? settings.socialLinks : [],
   };
 }
 
 export const getSiteSettings = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
   setPopulate(query, "populate[defaultSeo][populate][0]", "ogImage");
+  setPopulate(query, "populate[socialLinks]", true);
 
   const payload = await strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
     "/api/site-setting",
     query,
+    { cache: "no-store" },
   );
 
   return mapSiteSettings(normalizeSingle<RawSiteSettings>(payload));

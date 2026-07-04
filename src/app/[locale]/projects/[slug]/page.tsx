@@ -143,7 +143,7 @@ export default async function ProjectPage({ params }: PageProps) {
   );
 
   return (
-    <section className="min-h-screen bg-[var(--color-background)] pt-16">
+    <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative">
         <ProjectHeroGallery images={uniqueGallery} title={project.title} />
         <div className="absolute left-6 top-6">
@@ -258,7 +258,7 @@ export default async function ProjectPage({ params }: PageProps) {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-24 rounded-3xl bg-[var(--color-panel)] p-6">
+            <div className="sticky top-[calc(var(--site-header-height)+1.5rem)] rounded-3xl bg-[var(--color-panel)] p-6">
               <h2 className="font-display mb-5 text-sm font-bold">{copy.projectInfo}</h2>
 
               <div className="flex flex-col gap-4">

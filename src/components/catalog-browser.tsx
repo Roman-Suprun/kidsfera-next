@@ -94,7 +94,7 @@ export function CatalogBrowser({
   return (
     <div className="flex gap-8">
       <aside className="hidden w-56 shrink-0 md:block">
-        <div className="sticky top-24">
+        <div className="sticky top-[calc(var(--site-header-height)+1.5rem)]">
           <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--color-muted-foreground)]">
             {page.categoryLabel}
           </p>

@@ -12,6 +12,9 @@
   --color-accent: #ffd84d;
   --color-muted-foreground: #6b6050;
   --color-border: rgba(20, 18, 16, 0.12);
+  --site-topbar-height: 2.5rem;
+  --site-nav-height: 4rem;
+  --site-header-height: calc(var(--site-topbar-height) + var(--site-nav-height));
 }
 
 @theme inline {
@@ -31,6 +34,7 @@
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--site-header-height) + 1rem);
   }
 
   body {
@@ -65,6 +69,10 @@
 
   .section-space {
     padding-block: 6rem;
+  }
+
+  .page-offset {
+    padding-top: var(--site-header-height);
   }
 
   .brand-title {

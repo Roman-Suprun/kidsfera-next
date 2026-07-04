@@ -75,7 +75,7 @@ export default async function CategoriesPage({ params }: PageProps) {
   const itemsLabel = catalogPage?.itemsLabel ?? "items";
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pt-16">
+    <div className="page-offset min-h-screen bg-[var(--color-background)]">
       <section className="site-container py-16">
         <div className="mb-14">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">

@@ -222,7 +222,7 @@ export default async function HomePage({ params }: PageProps) {
   const galleryProjects = projects.slice(0, 4);
   return (
     <>
-      <section className="grid min-h-screen items-center pt-16 md:grid-cols-2">
+      <section className="page-offset grid min-h-screen items-center md:grid-cols-2">
         <div className="flex flex-col justify-center px-8 py-20 md:px-16">
           <div className="mb-8 inline-flex items-center gap-2 self-start rounded-full bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-surface-strong)]">
             <ZapIcon className="h-3.5 w-3.5" />
