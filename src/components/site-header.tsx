@@ -21,7 +21,7 @@ type Props = {
   settings: SiteSettings;
 };
 
-const aboutLabelByLocale: Record<Locale, string> = {
+const aboutLabelFallbackByLocale: Record<Locale, string> = {
   en: "About",
   uk: "Про нас",
   ru: "О нас",
@@ -47,7 +47,7 @@ export function SiteHeader({ locale, settings }: Props) {
   const homeHref = withLocale(locale);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const socialLinks = settings.socialLinks ?? [];
-  const aboutLabel = aboutLabelByLocale[locale];
+  const aboutLabel = settings.navAboutLabel || aboutLabelFallbackByLocale[locale];
 
   function closeMobileMenu() {
     setMobileMenuOpen(false);
@@ -55,12 +55,12 @@ export function SiteHeader({ locale, settings }: Props) {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      <div className="bg-[var(--color-surface-strong)] text-white">
+      <div className="border-b border-white/8 bg-[var(--color-surface-strong)] text-white">
         <div className="site-container flex h-[var(--site-topbar-height)] items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-2 text-[11px] text-white/50 sm:gap-5">
+          <div className="flex min-w-0 items-center gap-5 text-[11px] text-white/50">
             <a
               href={toPhoneHref(settings.contactPhone)}
-              className="inline-flex min-w-0 items-center gap-1.5 rounded-full transition-colors hover:text-white"
+              className="inline-flex min-w-0 items-center gap-1.5 transition-colors hover:text-white"
             >
               <span aria-hidden="true" className="text-xs leading-none text-[var(--color-primary)]">
                 📞
@@ -68,7 +68,7 @@ export function SiteHeader({ locale, settings }: Props) {
               <span className="truncate">{settings.contactPhone}</span>
             </a>
             {settings.businessHoursPrimary ? (
-              <span className="hidden items-center gap-1.5 sm:inline-flex">
+              <span className="hidden items-center gap-1.5 sm:flex">
                 <span aria-hidden="true" className="text-xs leading-none text-[var(--color-primary)]">
                   🕐
                 </span>
@@ -99,10 +99,10 @@ export function SiteHeader({ locale, settings }: Props) {
         </div>
       </div>
 
-      <div className="border-b border-[var(--color-border)] bg-[color:rgba(255,254,245,0.96)] shadow-[0_12px_34px_rgba(20,18,16,0.12)] backdrop-blur-md">
+      <div className="border-b border-[var(--color-border)] bg-[color:rgba(255,254,245,0.95)] shadow-[0_6px_24px_rgba(0,0,0,0.14)] backdrop-blur-sm">
         <div className="site-container flex h-[var(--site-nav-height)] items-center justify-between gap-4">
           <Link href={homeHref} className="flex min-w-0 shrink-0 items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] shadow-[0_10px_22px_rgba(255,69,0,0.24)]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary)]">
               <span className="font-display text-[13px] font-bold text-white">K</span>
             </div>
             <div className="min-w-0">{renderBrandName(settings.siteName)}</div>
@@ -119,6 +119,9 @@ export function SiteHeader({ locale, settings }: Props) {
               {settings.navProjectsLabel}
             </Link>
             <Link className="nav-link whitespace-nowrap" href={`${homeHref}#process`}>
+              {settings.navProcessLabel}
+            </Link>
+            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/about")}>
               {aboutLabel}
             </Link>
             <Link className="nav-link whitespace-nowrap" href={`${homeHref}#contact`}>
@@ -130,7 +133,7 @@ export function SiteHeader({ locale, settings }: Props) {
             <LanguageSwitcher locale={locale} />
             <Link
               href={`${homeHref}#contact`}
-              className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(255,69,0,0.22)] transition-all hover:bg-[#e03d00]"
+              className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e03d00]"
             >
               {settings.navCtaLabel}
             </Link>
@@ -144,7 +147,7 @@ export function SiteHeader({ locale, settings }: Props) {
                 aria-expanded={mobileMenuOpen}
                 aria-label="Toggle navigation menu"
                 onClick={() => setMobileMenuOpen((value) => !value)}
-                className="flex cursor-pointer items-center rounded-xl border border-[var(--color-border)] bg-white/75 p-2 text-[var(--color-foreground)] shadow-sm"
+                className="flex cursor-pointer items-center p-2 text-[var(--color-foreground)]"
               >
                 {mobileMenuOpen ? (
                   <XIcon className="h-5 w-5" />
@@ -153,7 +156,7 @@ export function SiteHeader({ locale, settings }: Props) {
                 )}
               </button>
               {mobileMenuOpen ? (
-                <div className="absolute right-0 top-full mt-3 flex w-[min(23rem,calc(100vw-2rem))] flex-col gap-4 rounded-3xl border border-[var(--color-border)] bg-[var(--color-background)] p-5 shadow-[0_22px_48px_rgba(20,18,16,0.16)]">
+                <div className="absolute right-0 top-full mt-3 flex w-[min(23rem,calc(100vw-2rem))] flex-col gap-4 border border-[var(--color-border)] bg-[var(--color-background)] p-5 shadow-[0_22px_48px_rgba(20,18,16,0.16)]">
                   <div className="rounded-2xl bg-[var(--color-surface-strong)] p-4 text-white">
                     <div className="grid gap-3">
                       <a
@@ -213,6 +216,13 @@ export function SiteHeader({ locale, settings }: Props) {
                   <Link
                     className="nav-link"
                     href={`${homeHref}#process`}
+                    onClick={closeMobileMenu}
+                  >
+                    {settings.navProcessLabel}
+                  </Link>
+                  <Link
+                    className="nav-link"
+                    href={withLocale(locale, "/about")}
                     onClick={closeMobileMenu}
                   >
                     {aboutLabel}

@@ -50,6 +50,25 @@ export type MediaImage = {
   alt: string;
 };
 
+export type AboutValue = {
+  title: string;
+  description: string;
+  icon: string;
+  theme: "orange" | "blue" | "yellow" | "green";
+};
+
+export type TeamMember = {
+  name: string;
+  role: string;
+  bio: string;
+  avatar: MediaImage | null;
+};
+
+export type TimelineMilestone = {
+  year: string;
+  text: string;
+};
+
 export type FeaturedProduct = {
   title: string;
   tagline: string;
@@ -131,6 +150,7 @@ export type SiteSettings = {
   navCatalogLabel: string;
   navProjectsLabel: string;
   navProcessLabel: string;
+  navAboutLabel: string;
   navContactLabel: string;
   navCtaLabel: string;
   footerDescription?: string | null;
@@ -208,6 +228,46 @@ export type CatalogPage = {
   viewDetailsLabel: string;
   itemsLabel: string;
   filtersLabel: string;
+};
+
+export type AboutPage = {
+  seo?: Seo | null;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroDescription: string;
+  heroImage: MediaImage | null;
+  heroStats: StatItem[];
+  storyEyebrow: string;
+  storyTitle: string;
+  storyParagraph1: string;
+  storyParagraph2: string;
+  milestones: TimelineMilestone[];
+  valuesEyebrow: string;
+  valuesTitle: string;
+  values: AboutValue[];
+  factoryEyebrow: string;
+  factoryTitle: string;
+  factoryDescription: string;
+  factoryImage: MediaImage | null;
+  factoryLocationLabel: string;
+  factoryAddress: string;
+  factoryStats: StatItem[];
+  teamEyebrow: string;
+  teamTitle: string;
+  teamMembers: TeamMember[];
+  certificationsEyebrow: string;
+  certificationsTitle: string;
+  certifications: Badge[];
+  safetyCalloutIcon: string;
+  safetyCalloutTitle: string;
+  safetyCalloutDescription: string;
+  safetyBadges: Badge[];
+  ctaTitle: string;
+  ctaDescription: string;
+  ctaPrimaryLabel: string;
+  ctaPrimaryHref: string;
+  ctaSecondaryLabel: string;
+  ctaSecondaryHref: string;
 };
 
 export type ProductPageLabels = {
@@ -308,6 +368,17 @@ type RawCatalogPage = Omit<CatalogPage, "seo"> & {
   seo?: RawSeo | null;
 };
 
+type RawTeamMember = Omit<TeamMember, "avatar"> & {
+  image?: StrapiMedia | null;
+};
+
+type RawAboutPage = Omit<AboutPage, "seo" | "heroImage" | "factoryImage" | "teamMembers"> & {
+  seo?: RawSeo | null;
+  heroImage?: StrapiMedia | null;
+  factoryImage?: StrapiMedia | null;
+  teamMembers?: RawTeamMember[];
+};
+
 type RawSiteSettings = Omit<SiteSettings, "defaultSeo"> & {
   defaultSeo?: RawSeo | null;
 };
@@ -355,6 +426,7 @@ const REVALIDATE_SECONDS = 60;
 const singleTypeFallbacks: Record<string, string[]> = {
   "/api/site-setting": ["/api/site-settings"],
   "/api/home-page": ["/api/home-pages"],
+  "/api/about-page": ["/api/about-pages"],
   "/api/categories-page": ["/api/categories-pages"],
   "/api/catalog-page": ["/api/catalog-pages"],
   "/api/product-page": ["/api/product-pages"],
@@ -594,6 +666,19 @@ function resolveMediaAlt(value: unknown) {
   return media.alternativeText ?? media.name ?? null;
 }
 
+function mapMediaImage(value: unknown, fallbackAlt = ""): MediaImage | null {
+  const url = resolveMediaUrl(value);
+
+  if (!url) {
+    return null;
+  }
+
+  return {
+    url,
+    alt: resolveMediaAlt(value) ?? fallbackAlt,
+  };
+}
+
 function mapImageLink(value: unknown): ImageLink | null {
   const image = value as RawImageLink | null;
 
@@ -621,16 +706,9 @@ function mapFeaturedProduct(value: unknown): FeaturedProduct | null {
     return null;
   }
 
-  const imageUrl = resolveMediaUrl(item.image);
-
   return {
     ...item,
-    image: imageUrl
-      ? {
-          url: imageUrl,
-          alt: item.imageAlt ?? resolveMediaAlt(item.image) ?? "",
-        }
-      : null,
+    image: mapMediaImage(item.image, item.imageAlt ?? ""),
     linkedCategory: mapCategory(item.linkedCategory),
   };
 }
@@ -703,6 +781,45 @@ function mapCatalogPage(value: unknown): CatalogPage | null {
   };
 }
 
+function mapTeamMember(value: unknown): TeamMember | null {
+  const member = value as RawTeamMember | null;
+
+  if (!member) {
+    return null;
+  }
+
+  return {
+    ...member,
+    avatar: mapMediaImage(member.image, member.name),
+  };
+}
+
+function mapAboutPage(value: unknown): AboutPage | null {
+  const page = value as RawAboutPage | null;
+
+  if (!page) {
+    return null;
+  }
+
+  return {
+    ...page,
+    seo: mapSeo(page.seo),
+    heroImage: mapMediaImage(page.heroImage, page.heroEyebrow),
+    heroStats: Array.isArray(page.heroStats) ? page.heroStats : [],
+    milestones: Array.isArray(page.milestones) ? page.milestones : [],
+    values: Array.isArray(page.values) ? page.values : [],
+    factoryImage: mapMediaImage(page.factoryImage, page.factoryTitle),
+    factoryStats: Array.isArray(page.factoryStats) ? page.factoryStats : [],
+    teamMembers: Array.isArray(page.teamMembers)
+      ? page.teamMembers
+          .map((entry) => mapTeamMember(entry))
+          .filter((entry): entry is TeamMember => Boolean(entry))
+      : [],
+    certifications: Array.isArray(page.certifications) ? page.certifications : [],
+    safetyBadges: Array.isArray(page.safetyBadges) ? page.safetyBadges : [],
+  };
+}
+
 function mapSiteSettings(value: unknown): SiteSettings | null {
   const settings = value as RawSiteSettings | null;
 
@@ -750,6 +867,27 @@ export const getHomePage = cache(async (locale: Locale) => {
   );
 
   return mapHomePage(normalizeSingle<RawHomePage>(payload));
+});
+
+export const getAboutPage = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+  setPopulate(query, "populate[heroImage]", true);
+  setPopulate(query, "populate[heroStats][populate][0]", false);
+  setPopulate(query, "populate[milestones][populate][0]", false);
+  setPopulate(query, "populate[values][populate][0]", false);
+  setPopulate(query, "populate[factoryImage]", true);
+  setPopulate(query, "populate[factoryStats][populate][0]", false);
+  setPopulate(query, "populate[teamMembers][populate][0]", "image");
+  setPopulate(query, "populate[certifications][populate][0]", false);
+  setPopulate(query, "populate[safetyBadges][populate][0]", false);
+
+  const payload = await strapiFetch<StrapiEnvelope<RawAboutPage | null>>(
+    "/api/about-page",
+    query,
+  );
+
+  return mapAboutPage(normalizeSingle<RawAboutPage>(payload));
 });
 
 export const getCategoriesPage = cache(async (locale: Locale) => {

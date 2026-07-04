@@ -9,7 +9,7 @@
   --color-panel-strong: #e8e0cf;
   --color-primary: #ff4500;
   --color-secondary: #0055ff;
-  --color-accent: #ffd84d;
+  --color-accent: #ffd700;
   --color-muted-foreground: #6b6050;
   --color-border: rgba(20, 18, 16, 0.12);
   --site-topbar-height: 2.5rem;
@@ -107,7 +107,7 @@
     margin: 0 0 1rem;
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-primary);
   }
@@ -115,7 +115,7 @@
   .small-label {
     font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-muted-foreground);
   }
