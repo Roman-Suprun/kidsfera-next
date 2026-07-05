@@ -270,6 +270,54 @@ export type AboutPage = {
   ctaSecondaryHref: string;
 };
 
+export type TermsMethod = {
+  icon: string;
+  title: string;
+  description: string;
+  badge?: string | null;
+  accentColor?: string | null;
+};
+
+export type DeliveryPaymentPage = {
+  seo?: Seo | null;
+  heroEyebrow: string;
+  title: string;
+  subtitle: string;
+  alertTitle: string;
+  alertSubtitle: string;
+  deliveryTitle: string;
+  paymentTitle: string;
+  deliveryMethods: TermsMethod[];
+  paymentMethods: TermsMethod[];
+  schemeTitle: string;
+  schemeStep1Value: string;
+  schemeStep1Title: string;
+  schemeStep1Description: string;
+  schemeStep2Value: string;
+  schemeStep2Title: string;
+  schemeStep2Description: string;
+  schemeBadge: string;
+  deliveryDetailTitle: string;
+  localTabLabel: string;
+  internationalTabLabel: string;
+  localDeliveryIntro: string;
+  localDeliveryLocations: string;
+  deliveryNote: string;
+  deliveryPickupNotes: Badge[];
+  internationalDeliveryIntro: string;
+  internationalCountries: Badge[];
+  paymentRequirementsTitle: string;
+  paymentRequirementsText: string;
+  cashTitle: string;
+  cashText: string;
+  ctaTitle: string;
+  ctaSubtitle: string;
+  ctaPrimaryLabel: string;
+  ctaPrimaryHref: string;
+  ctaSecondaryLabel: string;
+  ctaSecondaryHref: string;
+};
+
 export type ProductPageLabels = {
   galleryLabel?: string | null;
   specsLabel: string;
@@ -379,6 +427,10 @@ type RawAboutPage = Omit<AboutPage, "seo" | "heroImage" | "factoryImage" | "team
   teamMembers?: RawTeamMember[];
 };
 
+type RawDeliveryPaymentPage = Omit<DeliveryPaymentPage, "seo"> & {
+  seo?: RawSeo | null;
+};
+
 type RawSiteSettings = Omit<SiteSettings, "defaultSeo"> & {
   defaultSeo?: RawSeo | null;
 };
@@ -427,6 +479,7 @@ const singleTypeFallbacks: Record<string, string[]> = {
   "/api/site-setting": ["/api/site-settings"],
   "/api/home-page": ["/api/home-pages"],
   "/api/about-page": ["/api/about-pages"],
+  "/api/delivery-payment-page": ["/api/delivery-payment-pages"],
   "/api/categories-page": ["/api/categories-pages"],
   "/api/catalog-page": ["/api/catalog-pages"],
   "/api/product-page": ["/api/product-pages"],
@@ -820,6 +873,25 @@ function mapAboutPage(value: unknown): AboutPage | null {
   };
 }
 
+function mapDeliveryPaymentPage(value: unknown): DeliveryPaymentPage | null {
+  const page = value as RawDeliveryPaymentPage | null;
+
+  if (!page) {
+    return null;
+  }
+
+  return {
+    ...page,
+    seo: mapSeo(page.seo),
+    deliveryMethods: Array.isArray(page.deliveryMethods) ? page.deliveryMethods : [],
+    paymentMethods: Array.isArray(page.paymentMethods) ? page.paymentMethods : [],
+    deliveryPickupNotes: Array.isArray(page.deliveryPickupNotes) ? page.deliveryPickupNotes : [],
+    internationalCountries: Array.isArray(page.internationalCountries)
+      ? page.internationalCountries
+      : [],
+  };
+}
+
 function mapSiteSettings(value: unknown): SiteSettings | null {
   const settings = value as RawSiteSettings | null;
 
@@ -888,6 +960,22 @@ export const getAboutPage = cache(async (locale: Locale) => {
   );
 
   return mapAboutPage(normalizeSingle<RawAboutPage>(payload));
+});
+
+export const getDeliveryPaymentPage = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+  setPopulate(query, "populate[deliveryMethods][populate][0]", false);
+  setPopulate(query, "populate[paymentMethods][populate][0]", false);
+  setPopulate(query, "populate[deliveryPickupNotes][populate][0]", false);
+  setPopulate(query, "populate[internationalCountries][populate][0]", false);
+
+  const payload = await strapiFetch<StrapiEnvelope<RawDeliveryPaymentPage | null>>(
+    "/api/delivery-payment-page",
+    query,
+  );
+
+  return mapDeliveryPaymentPage(normalizeSingle<RawDeliveryPaymentPage>(payload));
 });
 
 export const getCategoriesPage = cache(async (locale: Locale) => {

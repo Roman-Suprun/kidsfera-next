@@ -1,10 +1,17 @@
+import Link from "next/link";
+
 import { SocialLinkIcon } from "@/components/social-link-icon";
-import type { Locale } from "@/lib/i18n";
+import { withLocale, type Locale } from "@/lib/i18n";
 import type { SiteSettings } from "@/lib/strapi";
 
 type Props = {
   locale: Locale;
   settings: SiteSettings;
+};
+
+type FooterItem = {
+  label: string;
+  href?: string;
 };
 
 const footerCopy: Record<
@@ -17,7 +24,7 @@ const footerCopy: Record<
     legalTitle: string;
     productItems: string[];
     companyItems: string[];
-    legalItems: string[];
+    legalItems: FooterItem[];
   }
 > = {
   en: {
@@ -28,7 +35,12 @@ const footerCopy: Record<
     legalTitle: "Legal",
     productItems: ["Labyrinths", "Playgrounds", "Climbing Walls", "Ball Pits"],
     companyItems: ["About Us", "Our Factory", "Projects", "Certifications"],
-    legalItems: ["Privacy Policy", "Terms of Sale", "EN 1176 Docs", "GDPR"],
+    legalItems: [
+      { label: "Privacy Policy" },
+      { label: "Terms of Sale", href: "/delivery-payment" },
+      { label: "EN 1176 Docs" },
+      { label: "GDPR" },
+    ],
   },
   uk: {
     follow: "Ми в соцмережах",
@@ -38,7 +50,12 @@ const footerCopy: Record<
     legalTitle: "Документи",
     productItems: ["Лабіринти", "Майданчики", "Скелодроми", "Сухі басейни"],
     companyItems: ["Про нас", "Наш завод", "Проєкти", "Сертифікати"],
-    legalItems: ["Конфіденційність", "Умови продажу", "EN 1176", "GDPR"],
+    legalItems: [
+      { label: "Конфіденційність" },
+      { label: "Умови продажу", href: "/delivery-payment" },
+      { label: "EN 1176" },
+      { label: "GDPR" },
+    ],
   },
   ru: {
     follow: "Мы в соцсетях",
@@ -48,7 +65,12 @@ const footerCopy: Record<
     legalTitle: "Документы",
     productItems: ["Лабиринты", "Площадки", "Скалодромы", "Сухие бассейны"],
     companyItems: ["О нас", "Наш завод", "Проекты", "Сертификаты"],
-    legalItems: ["Конфиденциальность", "Условия продажи", "EN 1176", "GDPR"],
+    legalItems: [
+      { label: "Конфиденциальность" },
+      { label: "Условия продажи", href: "/delivery-payment" },
+      { label: "EN 1176" },
+      { label: "GDPR" },
+    ],
   },
   pl: {
     follow: "Social media",
@@ -58,7 +80,12 @@ const footerCopy: Record<
     legalTitle: "Dokumenty",
     productItems: ["Labirynty", "Place zabaw", "Ścianki", "Suche baseny"],
     companyItems: ["O nas", "Nasza fabryka", "Realizacje", "Certyfikaty"],
-    legalItems: ["Polityka prywatności", "Warunki sprzedaży", "EN 1176", "RODO"],
+    legalItems: [
+      { label: "Polityka prywatności" },
+      { label: "Warunki sprzedaży", href: "/delivery-payment" },
+      { label: "EN 1176" },
+      { label: "RODO" },
+    ],
   },
 };
 
@@ -184,9 +211,19 @@ export function SiteFooter({ locale, settings }: Props) {
               </p>
               <div className="grid gap-1.5">
                 {copy.legalItems.map((item) => (
-                  <p key={item} className="text-white/60">
-                    {item}
-                  </p>
+                  item.href ? (
+                    <Link
+                      key={item.label}
+                      href={withLocale(locale, item.href)}
+                      className="footer-link text-white/60"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <p key={item.label} className="text-white/60">
+                      {item.label}
+                    </p>
+                  )
                 ))}
               </div>
             </div>
