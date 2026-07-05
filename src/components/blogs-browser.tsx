@@ -34,7 +34,11 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
   const filteredPosts = activeCategorySlug
     ? posts.filter((post) => post.category?.slug === activeCategorySlug)
     : posts;
-  const [featuredPost, ...remainingPosts] = filteredPosts;
+  const featuredPost =
+    filteredPosts.find((post) => post.featured) ?? filteredPosts[0] ?? null;
+  const remainingPosts = featuredPost
+    ? filteredPosts.filter((post) => post.slug !== featuredPost.slug)
+    : [];
 
   function getCategory(slug: string | null | undefined) {
     return categories.find((category) => category.slug === slug) ?? null;
