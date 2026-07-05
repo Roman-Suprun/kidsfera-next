@@ -151,6 +151,7 @@ export type SiteSettings = {
   navProjectsLabel: string;
   navProcessLabel: string;
   navAboutLabel: string;
+  navBlogLabel: string;
   navContactLabel: string;
   navCtaLabel: string;
   footerDescription?: string | null;
@@ -318,6 +319,53 @@ export type DeliveryPaymentPage = {
   ctaSecondaryHref: string;
 };
 
+export type BlogSection = {
+  heading: string;
+  text: string;
+};
+
+export type BlogPage = {
+  seo?: Seo | null;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  readMoreLabel: string;
+  readTimeLabel: string;
+  minutesShortLabel: string;
+  allCategoriesLabel: string;
+  backToBlogLabel: string;
+  relatedArticlesTitle: string;
+  authorLabel: string;
+  emptyStateText: string;
+};
+
+export type BlogCategory = {
+  id?: number;
+  documentId?: string;
+  name: string;
+  slug: string;
+  color: string;
+  sortOrder?: number | null;
+};
+
+export type BlogPost = {
+  id?: number;
+  documentId?: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImage: MediaImage | null;
+  authorName: string;
+  authorRole: string;
+  publishDate: string;
+  readTimeMinutes: number;
+  bodySections: BlogSection[];
+  category: BlogCategory | null;
+  seo?: Seo | null;
+  sortOrder?: number | null;
+  featured?: boolean | null;
+};
+
 export type ProductPageLabels = {
   galleryLabel?: string | null;
   specsLabel: string;
@@ -416,6 +464,18 @@ type RawCatalogPage = Omit<CatalogPage, "seo"> & {
   seo?: RawSeo | null;
 };
 
+type RawBlogPage = Omit<BlogPage, "seo"> & {
+  seo?: RawSeo | null;
+};
+
+type RawBlogCategory = BlogCategory;
+
+type RawBlogPost = Omit<BlogPost, "seo" | "coverImage" | "category"> & {
+  seo?: RawSeo | null;
+  coverImage?: StrapiMedia | null;
+  category?: RawBlogCategory | RawBlogCategory[] | null;
+};
+
 type RawTeamMember = Omit<TeamMember, "avatar"> & {
   image?: StrapiMedia | null;
 };
@@ -479,6 +539,7 @@ const singleTypeFallbacks: Record<string, string[]> = {
   "/api/site-setting": ["/api/site-settings"],
   "/api/home-page": ["/api/home-pages"],
   "/api/about-page": ["/api/about-pages"],
+  "/api/blog-page": ["/api/blog-pages"],
   "/api/delivery-payment-page": ["/api/delivery-payment-pages"],
   "/api/categories-page": ["/api/categories-pages"],
   "/api/catalog-page": ["/api/catalog-pages"],
@@ -834,6 +895,50 @@ function mapCatalogPage(value: unknown): CatalogPage | null {
   };
 }
 
+function mapBlogPage(value: unknown): BlogPage | null {
+  const page = value as RawBlogPage | null;
+
+  if (!page) {
+    return null;
+  }
+
+  return {
+    ...page,
+    seo: mapSeo(page.seo),
+  };
+}
+
+function mapBlogCategory(value: unknown): BlogCategory | null {
+  const category = value as RawBlogCategory | null;
+
+  if (!category) {
+    return null;
+  }
+
+  return {
+    ...category,
+    color: category.color || "#FF4500",
+  };
+}
+
+function mapBlogPost(value: unknown): BlogPost | null {
+  const post = value as RawBlogPost | null;
+
+  if (!post) {
+    return null;
+  }
+
+  return {
+    ...post,
+    seo: mapSeo(post.seo),
+    coverImage: mapMediaImage(post.coverImage, post.title),
+    bodySections: Array.isArray(post.bodySections) ? post.bodySections : [],
+    category: Array.isArray(post.category)
+      ? mapBlogCategory(post.category[0])
+      : mapBlogCategory(post.category),
+  };
+}
+
 function mapTeamMember(value: unknown): TeamMember | null {
   const member = value as RawTeamMember | null;
 
@@ -962,6 +1067,18 @@ export const getAboutPage = cache(async (locale: Locale) => {
   return mapAboutPage(normalizeSingle<RawAboutPage>(payload));
 });
 
+export const getBlogPage = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawBlogPage | null>>(
+    "/api/blog-page",
+    query,
+  );
+
+  return mapBlogPage(normalizeSingle<RawBlogPage>(payload));
+});
+
 export const getDeliveryPaymentPage = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
   setPopulate(query, "populate[seo][populate][0]", "ogImage");
@@ -1026,6 +1143,21 @@ export const getCategories = cache(async (locale: Locale) => {
   return normalizeCollection<RawCategory>(payload).map((entry) => mapCategory(entry)!);
 });
 
+export const getBlogCategories = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  query.append("sort[0]", "sortOrder:asc");
+  query.append("sort[1]", "name:asc");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawBlogCategory[]>>(
+    "/api/blog-categories",
+    query,
+  );
+
+  return normalizeCollection<RawBlogCategory>(payload)
+    .map((entry) => mapBlogCategory(entry))
+    .filter((entry): entry is BlogCategory => Boolean(entry));
+});
+
 export const getProducts = cache(async (locale: Locale) => {
   const query = sortCollection(baseQuery(locale));
   setPopulate(query, "populate[gallery][populate][0]", "image");
@@ -1038,6 +1170,22 @@ export const getProducts = cache(async (locale: Locale) => {
   );
 
   return normalizeCollection<RawProduct>(payload).map((entry) => mapProduct(entry)!);
+});
+
+export const getBlogPosts = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[coverImage]", true);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+  setPopulate(query, "populate[category]", true);
+  setPopulate(query, "populate[bodySections][populate][0]", false);
+  query.append("sort[0]", "sortOrder:asc");
+  query.append("sort[1]", "publishDate:desc");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawBlogPost[]>>("/api/blog-posts", query);
+
+  return normalizeCollection<RawBlogPost>(payload)
+    .map((entry) => mapBlogPost(entry))
+    .filter((entry): entry is BlogPost => Boolean(entry));
 });
 
 export const getProjects = cache(async (locale: Locale) => {
@@ -1059,6 +1207,20 @@ export async function getProjectBySlug(locale: Locale, slug: string) {
   const projects = await getProjects(locale);
 
   return projects.find((project) => project.slug === slug) ?? null;
+}
+
+export async function getBlogPostBySlug(locale: Locale, slug: string) {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[coverImage]", true);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+  setPopulate(query, "populate[category]", true);
+  setPopulate(query, "populate[bodySections][populate][0]", false);
+  query.set("filters[slug][$eq]", slug);
+
+  const payload = await strapiFetch<StrapiEnvelope<RawBlogPost[]>>("/api/blog-posts", query);
+  const [post] = normalizeCollection<RawBlogPost>(payload);
+
+  return mapBlogPost(post);
 }
 
 export const getTestimonials = cache(async (locale: Locale) => {

@@ -114,6 +114,17 @@ export function ClockIcon(props: IconProps) {
   );
 }
 
+export function CalendarIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <rect width="18" height="16" x="3" y="5" rx="2" />
+      <path d="M16 3v4" />
+      <path d="M8 3v4" />
+      <path d="M3 10h18" />
+    </BaseIcon>
+  );
+}
+
 export function ShieldIcon(props: IconProps) {
   return (
     <BaseIcon {...props}>

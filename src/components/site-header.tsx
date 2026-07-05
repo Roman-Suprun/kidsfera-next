@@ -28,6 +28,13 @@ const aboutLabelFallbackByLocale: Record<Locale, string> = {
   pl: "O nas",
 };
 
+const blogLabelFallbackByLocale: Record<Locale, string> = {
+  en: "Blog",
+  uk: "Блог",
+  ru: "Блог",
+  pl: "Blog",
+};
+
 function renderBrandName(name: string) {
   const cutIndex = Math.max(1, name.length - 5);
 
@@ -48,6 +55,7 @@ export function SiteHeader({ locale, settings }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const socialLinks = settings.socialLinks ?? [];
   const aboutLabel = settings.navAboutLabel || aboutLabelFallbackByLocale[locale];
+  const blogLabel = settings.navBlogLabel || blogLabelFallbackByLocale[locale];
 
   function closeMobileMenu() {
     setMobileMenuOpen(false);
@@ -123,6 +131,9 @@ export function SiteHeader({ locale, settings }: Props) {
             </Link>
             <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/about")}>
               {aboutLabel}
+            </Link>
+            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/blogs")}>
+              {blogLabel}
             </Link>
             <Link className="nav-link whitespace-nowrap" href={`${homeHref}#contact`}>
               {settings.navContactLabel}
@@ -226,6 +237,13 @@ export function SiteHeader({ locale, settings }: Props) {
                     onClick={closeMobileMenu}
                   >
                     {aboutLabel}
+                  </Link>
+                  <Link
+                    className="nav-link"
+                    href={withLocale(locale, "/blogs")}
+                    onClick={closeMobileMenu}
+                  >
+                    {blogLabel}
                   </Link>
                   <Link
                     className="nav-link"

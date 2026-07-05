@@ -250,9 +250,10 @@ export function CatalogBrowser({
         {filteredProducts.length ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product) => (
-              <article
+              <Link
                 key={product.slug}
-                className="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white text-left transition-all hover:border-[color:rgba(255,69,0,0.3)] hover:shadow-lg focus-within:ring-2 focus-within:ring-[var(--color-primary)]"
+                className="group overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white text-left transition-all hover:border-[color:rgba(255,69,0,0.3)] hover:shadow-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                href={withLocale(locale, `/products/${product.slug}`)}
               >
                 <div className="relative aspect-[4/3] bg-[var(--color-panel)]">
                   {product.gallery[0] ? (
@@ -304,16 +305,13 @@ export function CatalogBrowser({
                     <span className="text-sm font-bold text-[var(--color-primary)]">
                       {product.priceLabel}
                     </span>
-                    <Link
-                      className="inline-flex items-center gap-1 text-xs text-[var(--color-muted-foreground)] transition-all hover:gap-2 hover:text-[var(--color-primary)]"
-                      href={withLocale(locale, `/products/${product.slug}`)}
-                    >
+                    <span className="inline-flex items-center gap-1 text-xs text-[var(--color-muted-foreground)] transition-all group-hover:gap-2 group-hover:text-[var(--color-primary)]">
                       {page.viewDetailsLabel}
                       <ArrowRightIcon className="h-3 w-3" />
-                    </Link>
+                    </span>
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         ) : (
