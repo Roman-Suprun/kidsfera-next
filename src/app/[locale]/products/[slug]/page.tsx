@@ -50,32 +50,32 @@ const quotePrefillCopy: Record<
   {
     intro: string;
     productLabel: string;
-    categoryLabel: string;
+    categoriesLabel: string;
     priceLabel: string;
   }
 > = {
   en: {
     intro: "Hi, I'd like to request a quote for this product.",
     productLabel: "Product",
-    categoryLabel: "Category",
+    categoriesLabel: "Categories",
     priceLabel: "Budget range",
   },
   uk: {
     intro: "Вітаю, хочу отримати комерційну пропозицію для цього продукту.",
     productLabel: "Продукт",
-    categoryLabel: "Категорія",
+    categoriesLabel: "Категорії",
     priceLabel: "Орієнтовний бюджет",
   },
   ru: {
     intro: "Здравствуйте, хочу запросить коммерческое предложение для этого продукта.",
     productLabel: "Продукт",
-    categoryLabel: "Категория",
+    categoriesLabel: "Категории",
     priceLabel: "Ориентир по бюджету",
   },
   pl: {
     intro: "Dzień dobry, chciałbym otrzymać ofertę dla tego produktu.",
     productLabel: "Produkt",
-    categoryLabel: "Kategoria",
+    categoriesLabel: "Kategorie",
     priceLabel: "Orientacyjny budżet",
   },
 };
@@ -94,7 +94,7 @@ function buildQuotePrefillMessage(
     copy.intro,
     "",
     `${copy.productLabel}: ${product.name}`,
-    `${copy.categoryLabel}: ${product.categories.map((category) => category.name).join(", ") || "-"}`,
+    `${copy.categoriesLabel}: ${product.categories.map((category) => category.name).join(", ") || "-"}`,
     `${copy.priceLabel}: ${product.priceLabel}`,
   ].join("\n");
 }
@@ -152,7 +152,8 @@ export default async function ProductPage({ params }: PageProps) {
     )
     .slice(0, 3);
   const quotePrefillMessage = buildQuotePrefillMessage(typedLocale, product);
-  const productColor = product.category?.themeColor ?? "var(--color-primary)";
+  const primaryCategory = product.categories[0] ?? product.category ?? null;
+  const productColor = primaryCategory?.themeColor ?? "var(--color-primary)";
   const ratingCopy = productRatingCopy[typedLocale];
 
   return (
@@ -169,17 +170,17 @@ export default async function ProductPage({ params }: PageProps) {
           >
             {settings.navCatalogLabel}
           </Link>
-          {product.category ? (
-            <>
+          {product.categories.map((category) => (
+            <div key={`${product.slug}-breadcrumb-${category.slug}`} className="contents">
               <ChevronRightIcon className="h-3 w-3" />
               <Link
                 className="transition-colors hover:text-[var(--color-foreground)]"
-                href={withLocale(typedLocale, `/catalog?category=${product.category.slug}`)}
+                href={withLocale(typedLocale, `/catalog?category=${category.slug}`)}
               >
-                {product.category.name}
+                {category.name}
               </Link>
-            </>
-          ) : null}
+            </div>
+          ))}
           <ChevronRightIcon className="h-3 w-3" />
           <span className="font-medium text-[var(--color-foreground)]">{product.name}</span>
         </div>
@@ -303,11 +304,7 @@ export default async function ProductPage({ params }: PageProps) {
               </QuoteRequestLink>
               <Link
                 className="inline-flex h-[3.5rem] w-[3.5rem] items-center justify-center rounded-2xl bg-[var(--color-panel)] text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-panel-strong)]"
-                href={
-                  product.category
-                    ? withLocale(typedLocale, `/catalog?category=${product.category.slug}`)
-                    : withLocale(typedLocale, "/catalog")
-                }
+                href={withLocale(typedLocale, "/catalog")}
               >
                 <span className="sr-only">{labels.backToCatalogLabel}</span>
                 <ChevronLeftIcon className="h-4 w-4" />
