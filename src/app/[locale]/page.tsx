@@ -222,7 +222,7 @@ export default async function HomePage({ params }: PageProps) {
   const galleryProjects = projects.slice(0, 4);
   return (
     <>
-      <section className="page-offset grid min-h-screen items-center md:grid-cols-2">
+      <section className="page-offset grid min-h-[100svh] items-center md:grid-cols-2">
         <div className="flex flex-col justify-center px-8 py-20 md:px-16">
           <div className="mb-8 inline-flex items-center gap-2 self-start rounded-full bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-surface-strong)]">
             <ZapIcon className="h-3.5 w-3.5" />
@@ -269,7 +269,7 @@ export default async function HomePage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="relative h-[60vw] overflow-hidden bg-[var(--color-panel)] md:h-screen">
+        <div className="relative h-[60vw] overflow-hidden bg-[var(--color-panel)] md:h-[calc(100svh-var(--site-header-height))]">
           <Image
             alt={page.heroQuoteAttribution ?? page.heroTitleLine1}
             className="object-cover"
