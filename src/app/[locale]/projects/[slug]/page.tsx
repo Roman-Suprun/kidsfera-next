@@ -123,16 +123,8 @@ export default async function ProjectPage({ params }: PageProps) {
             },
           ]
         : [];
-  const galleryImages = [
-    ...primaryGallery,
-    ...usedProducts.flatMap((product) =>
-      product.gallery.slice(0, 2).map((image) => ({
-        url: image.url,
-        alt: image.alt || product.name,
-      })),
-    ),
-  ].filter((image): image is ImageLink => Boolean(image));
-  const uniqueGallery = galleryImages.filter(
+  const heroGallery = primaryGallery.filter((image): image is ImageLink => Boolean(image));
+  const uniqueGallery = heroGallery.filter(
     (image, index, list) => list.findIndex((candidate) => candidate.url === image.url) === index,
   );
   const inquiryMessage = buildProjectInquiryMessage(
