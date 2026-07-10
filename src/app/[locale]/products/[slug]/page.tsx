@@ -11,6 +11,7 @@ import {
 } from "@/components/icons";
 import { ProductGallery } from "@/components/product-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
+import { StrapiRichText } from "@/components/strapi-rich-text";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
@@ -234,9 +235,10 @@ export default async function ProductPage({ params }: PageProps) {
               </p>
             </div>
 
-            <p className="mb-8 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              {product.description}
-            </p>
+            <StrapiRichText
+              className="mb-8 text-sm leading-relaxed text-[var(--color-muted-foreground)]"
+              content={product.description}
+            />
 
             <div className="mb-8 rounded-2xl bg-[var(--color-panel)] p-5">
               <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">

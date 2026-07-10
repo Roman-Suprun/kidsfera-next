@@ -12,6 +12,7 @@ import {
 } from "@/components/icons";
 import { ProjectHeroGallery } from "@/components/project-hero-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
+import { StrapiRichText } from "@/components/strapi-rich-text";
 import { buildMetadata } from "@/lib/metadata";
 import {
   inferProjectThemeColor,
@@ -183,9 +184,10 @@ export default async function ProjectPage({ params }: PageProps) {
               {[project.clientName, project.location].filter(Boolean).join(" · ")}
             </p>
 
-            <p className="mb-10 text-base leading-relaxed text-[var(--color-foreground)]/80">
-              {project.description || project.subtitle}
-            </p>
+            <StrapiRichText
+              className="mb-10 text-base leading-relaxed text-[var(--color-foreground)]/80"
+              content={project.description || project.subtitle}
+            />
 
             {project.testimonial ? (
               <div className="mb-10 rounded-3xl bg-[var(--color-surface-strong)] p-8">
