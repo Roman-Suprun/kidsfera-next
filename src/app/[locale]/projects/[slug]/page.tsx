@@ -8,7 +8,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MapPinIcon,
-  StarIcon,
 } from "@/components/icons";
 import { ProjectHeroGallery } from "@/components/project-hero-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
@@ -191,16 +190,8 @@ export default async function ProjectPage({ params }: PageProps) {
 
             {project.testimonial ? (
               <div className="mb-10 rounded-3xl bg-[var(--color-surface-strong)] p-8">
-                <div className="mb-4 flex gap-1">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <StarIcon
-                      key={index}
-                      className="h-4 w-4 fill-[var(--color-accent)] text-[var(--color-accent)]"
-                    />
-                  ))}
-                </div>
                 <p className="mb-5 text-base italic leading-relaxed text-white">
-                  "{project.testimonial.quote}"
+                  &ldquo;{project.testimonial.quote}&rdquo;
                 </p>
                 <div>
                   <p className="text-sm font-semibold text-white">

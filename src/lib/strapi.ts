@@ -419,6 +419,23 @@ export type Product = {
   category?: Category | null;
 };
 
+export type FeedbackTargetType = "product" | "project";
+
+export type Feedback = {
+  id?: number;
+  documentId?: string;
+  name: string;
+  content: string;
+  rating: number;
+  createdAt?: string | null;
+  publishedAt?: string | null;
+};
+
+export type FeedbackSummary = {
+  averageRating: number | null;
+  totalCount: number;
+};
+
 export type Project = {
   id?: number;
   documentId?: string;
@@ -517,6 +534,8 @@ type RawProject = Omit<Project, "imageUrl" | "gallery" | "usedProducts" | "proje
   projectType?: RawCategory | RawCategory[] | null;
 };
 
+type RawFeedback = Feedback;
+
 export type Testimonial = {
   id?: number;
   documentId?: string;
@@ -532,8 +551,6 @@ const STRAPI_URL =
   process.env.STRAPI_URL ??
   process.env.NEXT_PUBLIC_STRAPI_URL ??
   "http://localhost:1337";
-const STRAPI_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ?? STRAPI_URL.replace("127.0.0.1", "localhost");
 const REVALIDATE_SECONDS = 60;
 const singleTypeFallbacks: Record<string, string[]> = {
   "/api/site-setting": ["/api/site-settings"],
@@ -866,6 +883,38 @@ function mapProject(value: unknown): Project | null {
     usedProducts: (project.usedProducts ?? [])
       .map((entry) => mapProduct(entry))
       .filter((entry): entry is Product => Boolean(entry)),
+  };
+}
+
+function mapFeedback(value: unknown): Feedback | null {
+  const feedback = value as RawFeedback | null;
+
+  if (!feedback) {
+    return null;
+  }
+
+  return {
+    ...feedback,
+    rating:
+      typeof feedback.rating === "number" && Number.isFinite(feedback.rating)
+        ? Math.min(5, Math.max(1, Math.round(feedback.rating)))
+        : 5,
+  };
+}
+
+function summarizeFeedback(feedbacks: Feedback[]): FeedbackSummary {
+  if (!feedbacks.length) {
+    return {
+      averageRating: null,
+      totalCount: 0,
+    };
+  }
+
+  const totalRating = feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
+
+  return {
+    averageRating: Math.round((totalRating / feedbacks.length) * 10) / 10,
+    totalCount: feedbacks.length,
   };
 }
 
@@ -1235,6 +1284,55 @@ export const getTestimonials = cache(async (locale: Locale) => {
 
   return normalizeCollection<Testimonial>(payload);
 });
+
+const getFeedbackByTarget = cache(async (targetType: FeedbackTargetType, documentId: string) => {
+  const query = new URLSearchParams();
+  query.set("status", "published");
+  query.set(`filters[${targetType}][documentId][$eq]`, documentId);
+  query.set("filters[publishedAt][$notNull]", "true");
+  query.append("sort[0]", "publishedAt:desc");
+  query.append("sort[1]", "createdAt:desc");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawFeedback[]>>("/api/feedbacks", query, {
+    cache: "no-store",
+  });
+
+  return normalizeCollection<RawFeedback>(payload)
+    .map((entry) => mapFeedback(entry))
+    .filter((entry): entry is Feedback => Boolean(entry));
+});
+
+export async function getProductFeedback(documentId: string | undefined) {
+  if (!documentId) {
+    return {
+      feedbacks: [] as Feedback[],
+      summary: summarizeFeedback([]),
+    };
+  }
+
+  const feedbacks = await getFeedbackByTarget("product", documentId);
+
+  return {
+    feedbacks,
+    summary: summarizeFeedback(feedbacks),
+  };
+}
+
+export async function getProjectFeedback(documentId: string | undefined) {
+  if (!documentId) {
+    return {
+      feedbacks: [] as Feedback[],
+      summary: summarizeFeedback([]),
+    };
+  }
+
+  const feedbacks = await getFeedbackByTarget("project", documentId);
+
+  return {
+    feedbacks,
+    summary: summarizeFeedback(feedbacks),
+  };
+}
 
 export async function getProductBySlug(locale: Locale, slug: string) {
   const query = baseQuery(locale);

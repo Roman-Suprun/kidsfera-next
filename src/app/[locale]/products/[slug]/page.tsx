@@ -9,6 +9,7 @@ import {
   ChevronRightIcon,
   ChevronLeftIcon,
 } from "@/components/icons";
+import { FeedbackSection } from "@/components/feedback-section";
 import { ProductGallery } from "@/components/product-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
@@ -16,6 +17,7 @@ import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
+  getProductFeedback,
   getProductBySlug,
   getProductPageLabels,
   getProducts,
@@ -36,14 +38,52 @@ const homeBreadcrumbLabels: Record<Locale, string> = {
 const productRatingCopy: Record<
   Locale,
   {
-    score: string;
-    reviews: string;
+    noReviews: string;
+    reviewsLabel: (count: number) => string;
   }
 > = {
-  en: { score: "4.9 / 5.0", reviews: "47 reviews" },
-  uk: { score: "4.9 / 5.0", reviews: "47 відгуків" },
-  ru: { score: "4.9 / 5.0", reviews: "47 отзывов" },
-  pl: { score: "4.9 / 5.0", reviews: "47 opinii" },
+  en: {
+    noReviews: "No approved reviews yet",
+    reviewsLabel: (count) => `${count} review${count === 1 ? "" : "s"}`,
+  },
+  uk: {
+    noReviews: "Ще немає схвалених відгуків",
+    reviewsLabel: (count) => {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+
+      if (mod10 === 1 && mod100 !== 11) {
+        return `${count} відгук`;
+      }
+
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+        return `${count} відгуки`;
+      }
+
+      return `${count} відгуків`;
+    },
+  },
+  ru: {
+    noReviews: "Пока нет одобренных отзывов",
+    reviewsLabel: (count) => {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+
+      if (mod10 === 1 && mod100 !== 11) {
+        return `${count} отзыв`;
+      }
+
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+        return `${count} отзыва`;
+      }
+
+      return `${count} отзывов`;
+    },
+  },
+  pl: {
+    noReviews: "Brak zatwierdzonych opinii",
+    reviewsLabel: (count) => `${count} opini${count === 1 ? "a" : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14) ? "e" : "i"}`,
+  },
 };
 
 const quotePrefillCopy: Record<
@@ -143,19 +183,25 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const relatedProducts = products
-    .filter(
-      (item) =>
-        item.slug !== product.slug &&
-        item.categories.some((category) =>
-          product.categories.some((productCategory) => productCategory.slug === category.slug),
-        ),
-    )
-    .slice(0, 3);
+  const categoryMatchedProducts = products.filter(
+    (item) =>
+      item.slug !== product.slug &&
+      item.categories.some((category) =>
+        product.categories.some((productCategory) => productCategory.slug === category.slug),
+      ),
+  );
+  const fallbackProducts = products.filter(
+    (item) =>
+      item.slug !== product.slug &&
+      !categoryMatchedProducts.some((matchedProduct) => matchedProduct.slug === item.slug),
+  );
+  const relatedProducts = [...categoryMatchedProducts, ...fallbackProducts].slice(0, 3);
   const quotePrefillMessage = buildQuotePrefillMessage(typedLocale, product);
   const primaryCategory = product.categories[0] ?? product.category ?? null;
   const productColor = primaryCategory?.themeColor ?? "var(--color-primary)";
   const ratingCopy = productRatingCopy[typedLocale];
+  const { feedbacks, summary } = await getProductFeedback(product.documentId);
+  const averageStars = summary.averageRating !== null ? Math.max(0, Math.min(5, Math.round(summary.averageRating))) : 0;
 
   return (
     <section className="page-offset min-h-screen bg-[var(--color-background)]">
@@ -217,12 +263,18 @@ export default async function ProductPage({ params }: PageProps) {
                 {Array.from({ length: 5 }).map((_, index) => (
                   <StarIcon
                     key={index}
-                    className="h-3.5 w-3.5 fill-[var(--color-accent)] text-[var(--color-accent)]"
+                    className={
+                      index < averageStars
+                        ? "h-3.5 w-3.5 fill-[var(--color-accent)] text-[var(--color-accent)]"
+                        : "h-3.5 w-3.5 text-[var(--color-border)]"
+                    }
                   />
                 ))}
               </div>
               <span className="text-xs text-[var(--color-muted-foreground)]">
-                {ratingCopy.score} · {ratingCopy.reviews}
+                {summary.averageRating !== null
+                  ? `${summary.averageRating.toFixed(1)} / 5 · ${ratingCopy.reviewsLabel(summary.totalCount)}`
+                  : ratingCopy.noReviews}
               </span>
             </div>
 
@@ -316,7 +368,7 @@ export default async function ProductPage({ params }: PageProps) {
         </div>
 
         {relatedProducts.length ? (
-          <div>
+          <div className="mt-16">
             <h2 className="font-display mb-6 text-xl font-bold">{labels.relatedTitle}</h2>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
               {relatedProducts.map((item) => (
@@ -345,6 +397,17 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
           </div>
         ) : null}
+
+        <div className="mt-16">
+          <FeedbackSection
+            feedbacks={feedbacks}
+            locale={typedLocale}
+            summary={summary}
+            targetLabel={product.name}
+            targetSlug={product.slug}
+            targetType="product"
+          />
+        </div>
       </div>
     </section>
   );

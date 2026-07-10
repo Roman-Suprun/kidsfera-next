@@ -341,13 +341,15 @@ export default async function HomePage({ params }: PageProps) {
               className="group relative overflow-hidden rounded-2xl text-left"
             >
               <div className="relative aspect-[4/3]">
-                <Image
-                  alt={category.name}
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  fill
-                  sizes="(min-width: 768px) 33vw, 50vw"
-                  src={category.imageUrl}
-                />
+                {category.imageUrl ? (
+                  <Image
+                    alt={category.name}
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(min-width: 768px) 33vw, 50vw"
+                    src={category.imageUrl}
+                  />
+                ) : null}
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
@@ -470,13 +472,15 @@ export default async function HomePage({ params }: PageProps) {
                 }`}
                 href={withLocale(typedLocale, `/projects/${project.slug}`)}
               >
-                <Image
-                  alt={project.title}
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  fill
-                  sizes={index === 0 ? "(min-width: 768px) 50vw, 50vw" : "(min-width: 768px) 25vw, 50vw"}
-                  src={project.imageUrl}
-                />
+                {project.imageUrl ? (
+                  <Image
+                    alt={project.title}
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes={index === 0 ? "(min-width: 768px) 50vw, 50vw" : "(min-width: 768px) 25vw, 50vw"}
+                    src={project.imageUrl}
+                  />
+                ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   {project.categories.length ? (
@@ -545,7 +549,7 @@ export default async function HomePage({ params }: PageProps) {
                     isAccent ? "text-white" : "text-[var(--color-foreground)]"
                   }`}
                 >
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div>
                   <div className={isAccent ? "text-sm font-semibold text-white" : "text-sm font-semibold text-[var(--color-foreground)]"}>
