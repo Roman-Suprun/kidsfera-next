@@ -7,19 +7,16 @@ import Link from "next/link";
 import { ArrowRightIcon, MapPinIcon } from "@/components/icons";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
-import {
-  inferProjectThemeColor,
-  projectPageCopy,
-} from "@/lib/project-presentation";
-import type { Project } from "@/lib/strapi";
+import { inferProjectThemeColor } from "@/lib/project-presentation";
+import type { Project, ProjectsPage } from "@/lib/strapi";
 
 type Props = {
   locale: Locale;
   projects: Project[];
+  page: Pick<ProjectsPage, "filterAllLabel" | "viewProjectLabel">;
 };
 
-export function ProjectsBrowser({ locale, projects }: Props) {
-  const copy = projectPageCopy[locale];
+export function ProjectsBrowser({ locale, projects, page }: Props) {
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
   const projectTypes = useMemo(
@@ -63,7 +60,7 @@ export function ProjectsBrowser({ locale, projects }: Props) {
           onClick={() => setTypeFilter(null)}
           type="button"
         >
-          {copy.filterAll}
+          {page.filterAllLabel}
         </button>
         {projectTypes.map((projectType) => {
           const color =
@@ -90,11 +87,6 @@ export function ProjectsBrowser({ locale, projects }: Props) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filteredProjects.map((project) => {
-          const themeColor =
-            project.themeColor ??
-            project.categories[0]?.themeColor ??
-            inferProjectThemeColor(project.projectType);
-
           return (
             <Link
               key={project.slug}
@@ -155,7 +147,7 @@ export function ProjectsBrowser({ locale, projects }: Props) {
                 ) : null}
 
                 <div className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] transition-all group-hover:gap-2">
-                  {copy.viewProject}
+                  {page.viewProjectLabel}
                   <ArrowRightIcon className="h-3 w-3" />
                 </div>
               </div>

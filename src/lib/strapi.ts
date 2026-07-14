@@ -231,6 +231,15 @@ export type CatalogPage = {
   filtersLabel: string;
 };
 
+export type ProjectsPage = {
+  seo?: Seo | null;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  filterAllLabel: string;
+  viewProjectLabel: string;
+};
+
 export type AboutPage = {
   seo?: Seo | null;
   heroEyebrow: string;
@@ -481,6 +490,10 @@ type RawCatalogPage = Omit<CatalogPage, "seo"> & {
   seo?: RawSeo | null;
 };
 
+type RawProjectsPage = Omit<ProjectsPage, "seo"> & {
+  seo?: RawSeo | null;
+};
+
 type RawBlogPage = Omit<BlogPage, "seo"> & {
   seo?: RawSeo | null;
 };
@@ -560,6 +573,7 @@ const singleTypeFallbacks: Record<string, string[]> = {
   "/api/delivery-payment-page": ["/api/delivery-payment-pages"],
   "/api/categories-page": ["/api/categories-pages"],
   "/api/catalog-page": ["/api/catalog-pages"],
+  "/api/projects-page": ["/api/projects-pages"],
   "/api/product-page": ["/api/product-pages"],
 };
 
@@ -944,6 +958,19 @@ function mapCatalogPage(value: unknown): CatalogPage | null {
   };
 }
 
+function mapProjectsPage(value: unknown): ProjectsPage | null {
+  const page = value as RawProjectsPage | null;
+
+  if (!page) {
+    return null;
+  }
+
+  return {
+    ...page,
+    seo: mapSeo(page.seo),
+  };
+}
+
 function mapBlogPage(value: unknown): BlogPage | null {
   const page = value as RawBlogPage | null;
 
@@ -1166,6 +1193,18 @@ export const getCatalogPage = cache(async (locale: Locale) => {
   );
 
   return mapCatalogPage(normalizeSingle<RawCatalogPage>(payload));
+});
+
+export const getProjectsPage = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawProjectsPage | null>>(
+    "/api/projects-page",
+    query,
+  );
+
+  return mapProjectsPage(normalizeSingle<RawProjectsPage>(payload));
 });
 
 export const getProductPageLabels = cache(async (locale: Locale) => {

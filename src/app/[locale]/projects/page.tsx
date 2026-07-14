@@ -4,8 +4,7 @@ import type { Metadata } from "next";
 import { ProjectsBrowser } from "@/components/projects-browser";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, locales } from "@/lib/i18n";
-import { getBaseSiteUrl, getProjects } from "@/lib/strapi";
-import { projectPageCopy } from "@/lib/project-presentation";
+import { getBaseSiteUrl, getProjects, getProjectsPage } from "@/lib/strapi";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -22,11 +21,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const copy = projectPageCopy[locale];
+  const page = await getProjectsPage(locale);
 
-  return buildMetadata(undefined, {
-    title: copy.eyebrow,
-    description: copy.subtitle,
+  if (!page) {
+    return {};
+  }
+
+  return buildMetadata(page.seo, {
+    title: page.title,
+    description: page.subtitle,
     baseUrl: getBaseSiteUrl(),
   });
 }
@@ -39,10 +42,12 @@ export default async function ProjectsPage({ params }: PageProps) {
   }
 
   const typedLocale = locale as Locale;
-  const projects = await getProjects(typedLocale);
-  const copy = projectPageCopy[typedLocale];
+  const [projects, page] = await Promise.all([
+    getProjects(typedLocale),
+    getProjectsPage(typedLocale),
+  ]);
 
-  if (!projects.length) {
+  if (!projects.length || !page) {
     notFound();
   }
 
@@ -53,24 +58,24 @@ export default async function ProjectsPage({ params }: PageProps) {
     <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative h-72 overflow-hidden bg-[var(--color-surface-strong)] md:h-96">
         <img
-          alt={copy.eyebrow}
+          alt={page.eyebrow}
           className="absolute inset-0 h-full w-full object-cover opacity-40"
           src={heroImage}
         />
         <div className="absolute inset-0 flex w-full flex-col justify-end px-8 pb-12 md:px-16">
           <div className="mx-auto w-full max-w-7xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">
-            {copy.eyebrow}
+              {page.eyebrow}
             </p>
             <h1 className="font-display whitespace-pre-line text-4xl font-bold text-white md:text-6xl">
-              {copy.title}
+              {page.title}
             </h1>
-            <p className="mt-4 max-w-xl text-base text-white/60">{copy.subtitle}</p>
+            <p className="mt-4 max-w-xl text-base text-white/60">{page.subtitle}</p>
           </div>
         </div>
       </div>
 
-      <ProjectsBrowser locale={typedLocale} projects={projects} />
+      <ProjectsBrowser locale={typedLocale} page={page} projects={projects} />
     </section>
   );
 }
