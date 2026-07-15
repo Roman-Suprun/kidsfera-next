@@ -23,10 +23,6 @@ function buildMailtoUrl(email: string, subject: string, body: string) {
 
 export function MailtoContactForm({ email, formCopy }: Props) {
   const [message, setMessage] = useState("");
-  const projectOptions = formCopy.projectOptions
-    .split("\n")
-    .map((option) => option.trim())
-    .filter(Boolean);
 
   useEffect(() => {
     try {
@@ -48,7 +44,6 @@ export function MailtoContactForm({ email, formCopy }: Props) {
     const firstName = getValue(formData, "firstName");
     const lastName = getValue(formData, "lastName");
     const senderEmail = getValue(formData, "email");
-    const projectType = getValue(formData, "projectType");
     const message = getValue(formData, "message");
     const fullName = [firstName, lastName].filter(Boolean).join(" ");
     const subject = fullName ? `Kidsfera enquiry from ${fullName}` : "Kidsfera enquiry";
@@ -56,7 +51,6 @@ export function MailtoContactForm({ email, formCopy }: Props) {
       `${formCopy.firstNameLabel}: ${firstName || "-"}`,
       `${formCopy.lastNameLabel}: ${lastName || "-"}`,
       `${formCopy.emailLabel}: ${senderEmail || "-"}`,
-      `${formCopy.projectTypeLabel}: ${projectType || "-"}`,
       "",
       `${formCopy.messageLabel}:`,
       message || "-",
@@ -103,23 +97,6 @@ export function MailtoContactForm({ email, formCopy }: Props) {
             placeholder={formCopy.emailPlaceholder}
             className="rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           />
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-            {formCopy.projectTypeLabel}
-          </span>
-          <select
-            name="projectType"
-            defaultValue=""
-            className="rounded-xl border-0 bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          >
-            <option value="">{formCopy.projectTypePlaceholder}</option>
-            {projectOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
