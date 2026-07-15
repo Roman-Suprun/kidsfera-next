@@ -1111,6 +1111,7 @@ export const getHomePage = cache(async (locale: Locale) => {
   setPopulate(query, "populate[processPhases][populate][0]", false);
   setPopulate(query, "populate[processSteps][populate][0]", false);
   setPopulate(query, "populate[contactItems][populate][0]", false);
+  setPopulate(query, "populate[contactForm][populate][0]", false);
   setPopulate(query, "populate[featuredProducts][populate][0]", "image");
   setPopulate(query, "populate[featuredProducts][populate][1]", "linkedCategory");
 
