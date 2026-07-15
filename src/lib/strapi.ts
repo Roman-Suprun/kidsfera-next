@@ -103,11 +103,14 @@ export type ContactForm = {
   firstNameLabel: string;
   lastNameLabel: string;
   emailLabel: string;
+  projectTypeLabel: string;
   messageLabel: string;
   firstNamePlaceholder: string;
   lastNamePlaceholder: string;
   emailPlaceholder: string;
+  projectTypePlaceholder: string;
   messagePlaceholder: string;
+  projectOptions: string;
   submitLabel: string;
   note: string;
 };
@@ -1111,6 +1114,7 @@ export const getHomePage = cache(async (locale: Locale) => {
   setPopulate(query, "populate[processPhases][populate][0]", false);
   setPopulate(query, "populate[processSteps][populate][0]", false);
   setPopulate(query, "populate[contactItems][populate][0]", false);
+  setPopulate(query, "populate[contactForm][populate][0]", false);
   setPopulate(query, "populate[featuredProducts][populate][0]", "image");
   setPopulate(query, "populate[featuredProducts][populate][1]", "linkedCategory");
 
