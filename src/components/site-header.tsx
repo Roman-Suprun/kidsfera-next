@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import {
   ClockIcon,
@@ -19,6 +20,12 @@ import type { SiteSettings } from "@/lib/strapi";
 type Props = {
   locale: Locale;
   settings: SiteSettings;
+};
+
+type NavItem = {
+  href: string;
+  label: string;
+  matchPaths?: string[];
 };
 
 const aboutLabelFallbackByLocale: Record<Locale, string> = {
@@ -50,12 +57,62 @@ function toPhoneHref(phone: string) {
   return `tel:${phone.replace(/[^\d+]/g, "")}`;
 }
 
+function isRouteActive(pathname: string, matchPaths: string[] = []) {
+  return matchPaths.some((matchPath) => pathname === matchPath || pathname.startsWith(`${matchPath}/`));
+}
+
+function getNavLinkClassName(isActive: boolean, mobile = false) {
+  return [
+    "nav-link",
+    mobile ? "nav-link-mobile" : "nav-link-desktop whitespace-nowrap",
+    isActive ? "nav-link-active" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function SiteHeader({ locale, settings }: Props) {
   const homeHref = withLocale(locale);
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const socialLinks = settings.socialLinks ?? [];
   const aboutLabel = settings.navAboutLabel || aboutLabelFallbackByLocale[locale];
   const blogLabel = settings.navBlogLabel || blogLabelFallbackByLocale[locale];
+  const navLinks: NavItem[] = [
+    {
+      href: withLocale(locale, "/categories"),
+      label: settings.navCategoriesLabel,
+      matchPaths: [withLocale(locale, "/categories")],
+    },
+    {
+      href: withLocale(locale, "/catalog"),
+      label: settings.navCatalogLabel,
+      matchPaths: [withLocale(locale, "/catalog"), withLocale(locale, "/products")],
+    },
+    {
+      href: withLocale(locale, "/projects"),
+      label: settings.navProjectsLabel,
+      matchPaths: [withLocale(locale, "/projects")],
+    },
+    {
+      href: `${homeHref}#process`,
+      label: settings.navProcessLabel,
+    },
+    {
+      href: withLocale(locale, "/about"),
+      label: aboutLabel,
+      matchPaths: [withLocale(locale, "/about")],
+    },
+    {
+      href: withLocale(locale, "/blogs"),
+      label: blogLabel,
+      matchPaths: [withLocale(locale, "/blogs")],
+    },
+    {
+      href: `${homeHref}#contact`,
+      label: settings.navContactLabel,
+    },
+  ];
 
   function closeMobileMenu() {
     setMobileMenuOpen(false);
@@ -116,28 +173,21 @@ export function SiteHeader({ locale, settings }: Props) {
             <div className="min-w-0">{renderBrandName(settings.siteName)}</div>
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-5 md:flex">
-            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/categories")}>
-              {settings.navCategoriesLabel}
-            </Link>
-            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/catalog")}>
-              {settings.navCatalogLabel}
-            </Link>
-            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/projects")}>
-              {settings.navProjectsLabel}
-            </Link>
-            <Link className="nav-link whitespace-nowrap" href={`${homeHref}#process`}>
-              {settings.navProcessLabel}
-            </Link>
-            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/about")}>
-              {aboutLabel}
-            </Link>
-            <Link className="nav-link whitespace-nowrap" href={withLocale(locale, "/blogs")}>
-              {blogLabel}
-            </Link>
-            <Link className="nav-link whitespace-nowrap" href={`${homeHref}#contact`}>
-              {settings.navContactLabel}
-            </Link>
+          <nav className="hidden flex-1 items-center justify-center gap-1 md:flex">
+            {navLinks.map((item) => {
+              const isActive = isRouteActive(pathname, item.matchPaths);
+
+              return (
+                <Link
+                  key={item.href}
+                  className={getNavLinkClassName(isActive)}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2 md:flex">
@@ -203,55 +253,22 @@ export function SiteHeader({ locale, settings }: Props) {
                     </div>
                   </div>
 
-                  <Link
-                    className="nav-link"
-                    href={withLocale(locale, "/categories")}
-                    onClick={closeMobileMenu}
-                  >
-                    {settings.navCategoriesLabel}
-                  </Link>
-                  <Link
-                    className="nav-link"
-                    href={withLocale(locale, "/catalog")}
-                    onClick={closeMobileMenu}
-                  >
-                    {settings.navCatalogLabel}
-                  </Link>
-                  <Link
-                    className="nav-link"
-                    href={withLocale(locale, "/projects")}
-                    onClick={closeMobileMenu}
-                  >
-                    {settings.navProjectsLabel}
-                  </Link>
-                  <Link
-                    className="nav-link"
-                    href={`${homeHref}#process`}
-                    onClick={closeMobileMenu}
-                  >
-                    {settings.navProcessLabel}
-                  </Link>
-                  <Link
-                    className="nav-link"
-                    href={withLocale(locale, "/about")}
-                    onClick={closeMobileMenu}
-                  >
-                    {aboutLabel}
-                  </Link>
-                  <Link
-                    className="nav-link"
-                    href={withLocale(locale, "/blogs")}
-                    onClick={closeMobileMenu}
-                  >
-                    {blogLabel}
-                  </Link>
-                  <Link
-                    className="nav-link"
-                    href={`${homeHref}#contact`}
-                    onClick={closeMobileMenu}
-                  >
-                    {settings.navContactLabel}
-                  </Link>
+                  {navLinks.map((item) => {
+                    const isActive = isRouteActive(pathname, item.matchPaths);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        className={getNavLinkClassName(isActive, true)}
+                        href={item.href}
+                        onClick={closeMobileMenu}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <span className="nav-link-mobile-dot" aria-hidden="true" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
                   <Link
                     href={`${homeHref}#contact`}
                     onClick={closeMobileMenu}
