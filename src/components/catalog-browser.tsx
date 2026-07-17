@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
   ArrowRightIcon,
@@ -61,9 +62,31 @@ export function CatalogBrowser({
   products,
   initialCategory,
 }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategory ?? null);
   const [ageFilter, setAgeFilter] = useState<(typeof ageGroups)[number]["id"]>("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    setCategoryFilter(initialCategory ?? null);
+  }, [initialCategory]);
+
+  function handleCategoryFilterChange(nextCategory: string | null) {
+    setCategoryFilter(nextCategory);
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextCategory) {
+      params.set("category", nextCategory);
+    } else {
+      params.delete("category");
+    }
+
+    const nextQuery = params.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+  }
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -105,7 +128,7 @@ export function CatalogBrowser({
                   ? "bg-[var(--color-primary)] font-semibold text-white"
                   : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-panel)] hover:text-[var(--color-foreground)]"
               }`}
-              onClick={() => setCategoryFilter(null)}
+              onClick={() => handleCategoryFilterChange(null)}
               type="button"
             >
               {page.allLabel}
@@ -118,7 +141,7 @@ export function CatalogBrowser({
                     ? "font-semibold"
                     : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-panel)] hover:text-[var(--color-foreground)]"
                 }`}
-                onClick={() => setCategoryFilter(category.slug)}
+                onClick={() => handleCategoryFilterChange(category.slug)}
                 style={
                   categoryFilter === category.slug
                     ? {
@@ -186,7 +209,7 @@ export function CatalogBrowser({
                         ? "bg-[var(--color-primary)] font-bold text-white"
                         : "text-[var(--color-muted-foreground)]"
                     }`}
-                    onClick={() => setCategoryFilter(null)}
+                    onClick={() => handleCategoryFilterChange(null)}
                     type="button"
                   >
                     {page.allLabel}
@@ -199,7 +222,7 @@ export function CatalogBrowser({
                           ? "font-bold"
                           : "text-[var(--color-muted-foreground)]"
                       }`}
-                      onClick={() => setCategoryFilter(category.slug)}
+                      onClick={() => handleCategoryFilterChange(category.slug)}
                       style={
                         categoryFilter === category.slug
                           ? {
