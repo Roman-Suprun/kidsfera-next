@@ -142,6 +142,16 @@ export type SocialLink = {
     | "custom";
 };
 
+export type FooterLinkItem = {
+  label: string;
+  href?: string | null;
+};
+
+export type FooterLinkGroup = {
+  title: string;
+  items: FooterLinkItem[];
+};
+
 export type SiteSettings = {
   siteName: string;
   siteTagline?: string | null;
@@ -163,6 +173,8 @@ export type SiteSettings = {
   contactPhone: string;
   contactAddress: string;
   socialLinks: SocialLink[];
+  footerLinkGroups: FooterLinkGroup[];
+  footerBadges: Badge[];
 };
 
 export type HomePage = {
@@ -1084,6 +1096,8 @@ function mapSiteSettings(value: unknown): SiteSettings | null {
     ...settings,
     defaultSeo: mapSeo(settings.defaultSeo),
     socialLinks: Array.isArray(settings.socialLinks) ? settings.socialLinks : [],
+    footerLinkGroups: Array.isArray(settings.footerLinkGroups) ? settings.footerLinkGroups : [],
+    footerBadges: Array.isArray(settings.footerBadges) ? settings.footerBadges : [],
   };
 }
 
@@ -1091,6 +1105,8 @@ export const getSiteSettings = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
   setPopulate(query, "populate[defaultSeo][populate][0]", "ogImage");
   setPopulate(query, "populate[socialLinks]", true);
+  setPopulate(query, "populate[footerLinkGroups][populate][items]", true);
+  setPopulate(query, "populate[footerBadges]", true);
 
   const payload = await strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
     "/api/site-setting",

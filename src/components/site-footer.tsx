@@ -9,85 +9,34 @@ type Props = {
   settings: SiteSettings;
 };
 
-type FooterItem = {
-  label: string;
-  href?: string;
-};
-
 const footerCopy: Record<
   Locale,
   {
     follow: string;
     hoursFallback: string;
-    productsTitle: string;
-    companyTitle: string;
-    legalTitle: string;
-    productItems: string[];
-    companyItems: string[];
-    legalItems: FooterItem[];
   }
 > = {
   en: {
     follow: "Follow us",
     hoursFallback: "Working Hours",
-    productsTitle: "Products",
-    companyTitle: "Company",
-    legalTitle: "Legal",
-    productItems: ["Labyrinths", "Playgrounds", "Climbing Walls", "Ball Pits"],
-    companyItems: ["About Us", "Our Factory", "Projects", "Certifications"],
-    legalItems: [
-      { label: "Privacy Policy" },
-      { label: "Terms of Sale", href: "/delivery-payment" },
-      { label: "EN 1176 Docs" },
-      { label: "GDPR" },
-    ],
   },
   uk: {
     follow: "Ми в соцмережах",
     hoursFallback: "Графік роботи",
-    productsTitle: "Продукція",
-    companyTitle: "Компанія",
-    legalTitle: "Документи",
-    productItems: ["Лабіринти", "Майданчики", "Скелодроми", "Сухі басейни"],
-    companyItems: ["Про нас", "Наш завод", "Проєкти", "Сертифікати"],
-    legalItems: [
-      { label: "Конфіденційність" },
-      { label: "Умови продажу", href: "/delivery-payment" },
-      { label: "EN 1176" },
-      { label: "GDPR" },
-    ],
   },
   ru: {
     follow: "Мы в соцсетях",
     hoursFallback: "График работы",
-    productsTitle: "Продукция",
-    companyTitle: "Компания",
-    legalTitle: "Документы",
-    productItems: ["Лабиринты", "Площадки", "Скалодромы", "Сухие бассейны"],
-    companyItems: ["О нас", "Наш завод", "Проекты", "Сертификаты"],
-    legalItems: [
-      { label: "Конфиденциальность" },
-      { label: "Условия продажи", href: "/delivery-payment" },
-      { label: "EN 1176" },
-      { label: "GDPR" },
-    ],
   },
   pl: {
     follow: "Social media",
     hoursFallback: "Godziny pracy",
-    productsTitle: "Produkty",
-    companyTitle: "Firma",
-    legalTitle: "Dokumenty",
-    productItems: ["Labirynty", "Place zabaw", "Ścianki", "Suche baseny"],
-    companyItems: ["O nas", "Nasza fabryka", "Realizacje", "Certyfikaty"],
-    legalItems: [
-      { label: "Polityka prywatności" },
-      { label: "Warunki sprzedaży", href: "/delivery-payment" },
-      { label: "EN 1176" },
-      { label: "RODO" },
-    ],
   },
 };
+
+function isExternalHref(href: string) {
+  return /^(https?:|mailto:|tel:|#)/i.test(href);
+}
 
 function renderBrandName(name: string) {
   const cutIndex = Math.max(1, name.length - 5);
@@ -117,6 +66,8 @@ function splitHours(settings: SiteSettings) {
 export function SiteFooter({ locale, settings }: Props) {
   const copy = footerCopy[locale];
   const socialLinks = settings.socialLinks ?? [];
+  const footerLinkGroups = settings.footerLinkGroups ?? [];
+  const footerBadges = settings.footerBadges ?? [];
   const hours = splitHours(settings);
 
   return (
@@ -176,71 +127,65 @@ export function SiteFooter({ locale, settings }: Props) {
             ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-8 text-sm md:grid-cols-3">
-            <div>
-              <p className="mb-3 text-xs uppercase tracking-widest text-white/30">
-                {copy.productsTitle}
-              </p>
-              <div className="grid gap-1.5">
-                {copy.productItems.map((item) => (
-                  <p key={item} className="text-white/60">
-                    {item}
+          {footerLinkGroups.length ? (
+            <div className="grid grid-cols-2 gap-8 text-sm md:grid-cols-3">
+              {footerLinkGroups.map((group) => (
+                <div key={group.title}>
+                  <p className="mb-3 text-xs uppercase tracking-widest text-white/30">
+                    {group.title}
                   </p>
-                ))}
-              </div>
-            </div>
+                  <div className="grid gap-1.5">
+                    {group.items.map((item) => {
+                      if (!item.href) {
+                        return (
+                          <p key={item.label} className="text-white/60">
+                            {item.label}
+                          </p>
+                        );
+                      }
 
-            <div>
-              <p className="mb-3 text-xs uppercase tracking-widest text-white/30">
-                {copy.companyTitle}
-              </p>
-              <div className="grid gap-1.5">
-                {copy.companyItems.map((item) => {
-                  return (
-                    <p key={item} className="text-white/60">
-                      {item}
-                    </p>
-                  );
-                })}
-              </div>
-            </div>
+                      if (isExternalHref(item.href)) {
+                        return (
+                          <a
+                            key={`${group.title}-${item.label}`}
+                            href={item.href}
+                            className="footer-link text-white/60"
+                            target={item.href.startsWith("http") ? "_blank" : undefined}
+                            rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+                          >
+                            {item.label}
+                          </a>
+                        );
+                      }
 
-            <div>
-              <p className="mb-3 text-xs uppercase tracking-widest text-white/30">
-                {copy.legalTitle}
-              </p>
-              <div className="grid gap-1.5">
-                {copy.legalItems.map((item) => (
-                  item.href ? (
-                    <Link
-                      key={item.label}
-                      href={withLocale(locale, item.href)}
-                      className="footer-link text-white/60"
-                    >
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <p key={item.label} className="text-white/60">
-                      {item.label}
-                    </p>
-                  )
-                ))}
-              </div>
+                      return (
+                        <Link
+                          key={`${group.title}-${item.label}`}
+                          href={withLocale(locale, item.href)}
+                          className="footer-link text-white/60"
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : null}
         </div>
 
         <div className="flex flex-col items-center justify-between gap-4 pt-6 md:flex-row">
           <p className="text-xs text-white/30">
             {settings.footerCopyright ?? `${settings.siteName} ©`}
           </p>
-          <div className="flex gap-3">
-            {["EN 1176", "CE", "ISO 9001", "ASTM F1292"].map((item) => (
+          <div className="flex flex-wrap justify-center gap-3 md:justify-end">
+            {footerBadges.map((item) => (
               <span
-                key={item}
+                key={item.label}
                 className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/50"
               >
-                {item}
+                {item.label}
               </span>
             ))}
           </div>
