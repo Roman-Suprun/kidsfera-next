@@ -23,11 +23,8 @@ export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
   const pathname = usePathname() ?? withLocale(locale);
   const localizedPath = stripLocaleFromPath(pathname);
   const ref = useRef<HTMLDivElement>(null);
-  const dropdownLocales = visibleLocales.length
-    ? visibleLocales.includes(locale)
-      ? visibleLocales
-      : [locale, ...visibleLocales]
-    : locales;
+  const dropdownLocales = visibleLocales.length ? visibleLocales : locales;
+  const switchableLocales = dropdownLocales.filter((item) => item !== locale);
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -63,39 +60,20 @@ export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
         </svg>
       </button>
 
-      {open ? (
+      {open && switchableLocales.length ? (
         <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[170px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white shadow-[0_18px_40px_rgba(20,18,16,0.14)]">
-          {dropdownLocales.map((item) => {
+          {switchableLocales.map((item) => {
             const href = withLocale(item, localizedPath);
-            const isActive = item === locale;
 
             return (
               <Link
                 key={item}
                 href={href}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                  isActive
-                    ? "bg-[var(--color-panel)] font-semibold text-[var(--color-foreground)]"
-                    : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-panel)] hover:text-[var(--color-foreground)]"
-                }`}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-muted-foreground)] transition-colors hover:bg-[var(--color-panel)] hover:text-[var(--color-foreground)]"
               >
                 <span className="text-base">{localeFlags[item]}</span>
                 <span className="flex-1">{localeLabels[item]}</span>
-                {isActive ? (
-                  <svg
-                    aria-hidden="true"
-                    className="h-3.5 w-3.5 text-[var(--color-primary)]"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="m5 12 5 5L20 7" />
-                  </svg>
-                ) : null}
               </Link>
             );
           })}
