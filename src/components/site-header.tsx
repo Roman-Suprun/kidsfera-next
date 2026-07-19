@@ -191,7 +191,7 @@ export function SiteHeader({ locale, settings }: Props) {
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2 md:flex">
-            <LanguageSwitcher locale={locale} />
+            <LanguageSwitcher locale={locale} visibleLocales={settings.languageSwitcherLocales} />
             <Link
               href={`${homeHref}#contact`}
               className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e03d00]"
@@ -201,7 +201,7 @@ export function SiteHeader({ locale, settings }: Props) {
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <LanguageSwitcher locale={locale} />
+            <LanguageSwitcher locale={locale} visibleLocales={settings.languageSwitcherLocales} />
             <div className="relative">
               <button
                 type="button"

@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { defaultLocale, type Locale } from "@/lib/i18n";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n";
 
 type StrapiEnvelope<T> =
   | {
@@ -156,6 +156,7 @@ export type SiteSettings = {
   siteName: string;
   siteTagline?: string | null;
   defaultSeo?: Seo | null;
+  languageSwitcherLocales: Locale[];
   navCategoriesLabel: string;
   navCatalogLabel: string;
   navProjectsLabel: string;
@@ -545,8 +546,12 @@ type RawLegalPage = Omit<LegalPage, "seo"> & {
   seo?: RawSeo | null;
 };
 
-type RawSiteSettings = Omit<SiteSettings, "defaultSeo"> & {
+type RawSiteSettings = Omit<SiteSettings, "defaultSeo" | "languageSwitcherLocales"> & {
   defaultSeo?: RawSeo | null;
+  showEnglish?: boolean | null;
+  showUkrainian?: boolean | null;
+  showRussian?: boolean | null;
+  showPolish?: boolean | null;
 };
 
 type RawCategory = Omit<Category, "imageUrl" | "seo"> & {
@@ -1119,29 +1124,79 @@ function mapSiteSettings(value: unknown): SiteSettings | null {
     return null;
   }
 
+  const {
+    defaultSeo,
+    showEnglish,
+    showUkrainian,
+    showRussian,
+    showPolish,
+    ...rest
+  } = settings;
+
+  const localeToggles: Array<[Locale, boolean | null | undefined]> = [
+    ["en", showEnglish],
+    ["uk", showUkrainian],
+    ["ru", showRussian],
+    ["pl", showPolish],
+  ];
+  const hasExplicitLocaleSelection = localeToggles.some(([, enabled]) => typeof enabled === "boolean");
+  const selectedLocales = hasExplicitLocaleSelection
+    ? localeToggles
+        .filter(([, enabled]) => enabled !== false)
+        .map(([locale]) => locale)
+    : locales;
+  const languageSwitcherLocales = selectedLocales.length ? selectedLocales : [defaultLocale];
+
   return {
-    ...settings,
-    defaultSeo: mapSeo(settings.defaultSeo),
-    socialLinks: Array.isArray(settings.socialLinks) ? settings.socialLinks : [],
-    footerLinkGroups: Array.isArray(settings.footerLinkGroups) ? settings.footerLinkGroups : [],
-    footerBadges: Array.isArray(settings.footerBadges) ? settings.footerBadges : [],
+    ...rest,
+    defaultSeo: mapSeo(defaultSeo),
+    languageSwitcherLocales,
+    socialLinks: Array.isArray(rest.socialLinks) ? rest.socialLinks : [],
+    footerLinkGroups: Array.isArray(rest.footerLinkGroups) ? rest.footerLinkGroups : [],
+    footerBadges: Array.isArray(rest.footerBadges) ? rest.footerBadges : [],
   };
 }
 
 export const getSiteSettings = cache(async (locale: Locale) => {
-  const query = baseQuery(locale);
-  setPopulate(query, "populate[defaultSeo][populate][0]", "ogImage");
-  setPopulate(query, "populate[socialLinks]", true);
-  setPopulate(query, "populate[footerLinkGroups][populate][items]", true);
-  setPopulate(query, "populate[footerBadges]", true);
+  const buildSiteSettingsQuery = (targetLocale: Locale) => {
+    const query = baseQuery(targetLocale);
+    setPopulate(query, "populate[defaultSeo][populate][0]", "ogImage");
+    setPopulate(query, "populate[socialLinks]", true);
+    setPopulate(query, "populate[footerLinkGroups][populate][items]", true);
+    setPopulate(query, "populate[footerBadges]", true);
+    return query;
+  };
 
-  const payload = await strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
-    "/api/site-setting",
-    query,
-    { cache: "no-store" },
-  );
+  const [localizedPayload, sharedPayload] = await Promise.all([
+    strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
+      "/api/site-setting",
+      buildSiteSettingsQuery(locale),
+      { cache: "no-store" },
+    ),
+    locale === defaultLocale
+      ? Promise.resolve(null)
+      : strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
+          "/api/site-setting",
+          buildSiteSettingsQuery(defaultLocale),
+          { cache: "no-store" },
+        ),
+  ]);
 
-  return mapSiteSettings(normalizeSingle<RawSiteSettings>(payload));
+  const localizedSettings = mapSiteSettings(normalizeSingle<RawSiteSettings>(localizedPayload));
+
+  if (!localizedSettings) {
+    return null;
+  }
+
+  const sharedSettings =
+    sharedPayload === null
+      ? localizedSettings
+      : mapSiteSettings(normalizeSingle<RawSiteSettings>(sharedPayload));
+
+  return {
+    ...localizedSettings,
+    languageSwitcherLocales: sharedSettings?.languageSwitcherLocales ?? localizedSettings.languageSwitcherLocales,
+  };
 });
 
 export const getHomePage = cache(async (locale: Locale) => {

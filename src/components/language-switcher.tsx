@@ -8,19 +8,26 @@ import {
   localeFlags,
   localeLabels,
   locales,
+  stripLocaleFromPath,
   type Locale,
   withLocale,
 } from "@/lib/i18n";
 
 type Props = {
   locale: Locale;
+  visibleLocales?: Locale[];
 };
 
-export function LanguageSwitcher({ locale }: Props) {
+export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() ?? withLocale(locale);
-  const localizedPath = pathname.replace(/^\/(en|uk|ru|pl)(?=\/|$)/, "") || "/";
+  const localizedPath = stripLocaleFromPath(pathname);
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownLocales = visibleLocales.length
+    ? visibleLocales.includes(locale)
+      ? visibleLocales
+      : [locale, ...visibleLocales]
+    : locales;
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -58,7 +65,7 @@ export function LanguageSwitcher({ locale }: Props) {
 
       {open ? (
         <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[170px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white shadow-[0_18px_40px_rgba(20,18,16,0.14)]">
-          {locales.map((item) => {
+          {dropdownLocales.map((item) => {
             const href = withLocale(item, localizedPath);
             const isActive = item === locale;
 

@@ -18,6 +18,8 @@ export const localeFlags: Record<Locale, string> = {
   pl: "🇵🇱",
 };
 
+const localePathPattern = new RegExp(`^/(${locales.join("|")})(?=/|$)`);
+
 export function isLocale(value: string): value is Locale {
   return locales.includes(value as Locale);
 }
@@ -39,4 +41,8 @@ export function getLocaleFromHeader(headerValue: string | null): Locale {
 export function withLocale(locale: Locale, path = ""): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
+}
+
+export function stripLocaleFromPath(pathname: string): string {
+  return pathname.replace(localePathPattern, "") || "/";
 }
