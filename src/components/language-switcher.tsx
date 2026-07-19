@@ -15,7 +15,7 @@ import {
 
 type Props = {
   locale: Locale;
-  visibleLocales?: Locale[];
+  visibleLocales?: readonly Locale[];
 };
 
 export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
