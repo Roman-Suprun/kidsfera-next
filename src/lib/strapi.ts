@@ -340,6 +340,14 @@ export type DeliveryPaymentPage = {
   ctaSecondaryHref: string;
 };
 
+export type LegalPage = {
+  seo?: Seo | null;
+  heroEyebrow: string;
+  title: string;
+  subtitle: string;
+  content: string;
+};
+
 export type BlogSection = {
   heading: string;
   text: string;
@@ -533,6 +541,10 @@ type RawDeliveryPaymentPage = Omit<DeliveryPaymentPage, "seo"> & {
   seo?: RawSeo | null;
 };
 
+type RawLegalPage = Omit<LegalPage, "seo"> & {
+  seo?: RawSeo | null;
+};
+
 type RawSiteSettings = Omit<SiteSettings, "defaultSeo"> & {
   defaultSeo?: RawSeo | null;
 };
@@ -583,6 +595,8 @@ const singleTypeFallbacks: Record<string, string[]> = {
   "/api/about-page": ["/api/about-pages"],
   "/api/blog-page": ["/api/blog-pages"],
   "/api/delivery-payment-page": ["/api/delivery-payment-pages"],
+  "/api/privacy-policy-page": ["/api/privacy-policy-pages"],
+  "/api/gdpr-page": ["/api/gdpr-pages"],
   "/api/categories-page": ["/api/categories-pages"],
   "/api/catalog-page": ["/api/catalog-pages"],
   "/api/projects-page": ["/api/projects-pages"],
@@ -1085,6 +1099,19 @@ function mapDeliveryPaymentPage(value: unknown): DeliveryPaymentPage | null {
   };
 }
 
+function mapLegalPage(value: unknown): LegalPage | null {
+  const page = value as RawLegalPage | null;
+
+  if (!page) {
+    return null;
+  }
+
+  return {
+    ...page,
+    seo: mapSeo(page.seo),
+  };
+}
+
 function mapSiteSettings(value: unknown): SiteSettings | null {
   const settings = value as RawSiteSettings | null;
 
@@ -1186,6 +1213,30 @@ export const getDeliveryPaymentPage = cache(async (locale: Locale) => {
   );
 
   return mapDeliveryPaymentPage(normalizeSingle<RawDeliveryPaymentPage>(payload));
+});
+
+export const getPrivacyPolicyPage = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawLegalPage | null>>(
+    "/api/privacy-policy-page",
+    query,
+  );
+
+  return mapLegalPage(normalizeSingle<RawLegalPage>(payload));
+});
+
+export const getGdprPage = cache(async (locale: Locale) => {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+
+  const payload = await strapiFetch<StrapiEnvelope<RawLegalPage | null>>(
+    "/api/gdpr-page",
+    query,
+  );
+
+  return mapLegalPage(normalizeSingle<RawLegalPage>(payload));
 });
 
 export const getCategoriesPage = cache(async (locale: Locale) => {
