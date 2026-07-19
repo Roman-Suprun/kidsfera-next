@@ -156,7 +156,7 @@ export type SiteSettings = {
   siteName: string;
   siteTagline?: string | null;
   defaultSeo?: Seo | null;
-  languageSwitcherLocales: Locale[];
+  languageSwitcherLocales: readonly Locale[];
   navCategoriesLabel: string;
   navCatalogLabel: string;
   navProjectsLabel: string;
