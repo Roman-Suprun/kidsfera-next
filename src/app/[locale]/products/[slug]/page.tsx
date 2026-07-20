@@ -299,12 +299,6 @@ export default async function ProductPage({ params }: PageProps) {
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-xs text-[var(--color-muted-foreground)]">
-                    {labels.ageLabel}
-                  </span>
-                  <span className="text-sm font-semibold">{product.ageRange}</span>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-[var(--color-muted-foreground)]">
                     {labels.sizeLabel}
                   </span>
                   <span className="text-sm font-semibold">{product.size}</span>

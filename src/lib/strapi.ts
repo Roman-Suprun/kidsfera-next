@@ -236,7 +236,6 @@ export type CatalogPage = {
   description?: string | null;
   filterByLabel: string;
   categoryLabel: string;
-  ageRangeLabel: string;
   allLabel: string;
   noResultsLabel: string;
   viewDetailsLabel: string;
@@ -399,7 +398,6 @@ export type BlogPost = {
 export type ProductPageLabels = {
   galleryLabel?: string | null;
   specsLabel: string;
-  ageLabel: string;
   sizeLabel: string;
   capacityLabel: string;
   materialLabel: string;
@@ -434,7 +432,6 @@ export type Product = {
   slug: string;
   shortDescription: string;
   description: string;
-  ageRange: string;
   priceLabel: string;
   size: string;
   capacity: string;

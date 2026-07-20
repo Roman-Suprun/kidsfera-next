@@ -23,38 +23,6 @@ type Props = {
   initialCategory?: string | null;
 };
 
-const ageGroups = [
-  { id: "all", min: null, max: null },
-  { id: "1-4", min: 1, max: 4 },
-  { id: "4-8", min: 4, max: 8 },
-  { id: "8-16", min: 8, max: 16 },
-] as const;
-
-const agePrefixByLocale: Record<Locale, string> = {
-  en: "Ages",
-  uk: "Вік",
-  ru: "Возраст",
-  pl: "Wiek",
-};
-
-const yearsSuffixByLocale: Record<Locale, string> = {
-  en: "yrs",
-  uk: "р.",
-  ru: "лет",
-  pl: "lat",
-};
-
-function parseAgeRange(input: string) {
-  const clean = input.replace(/[^0-9-–]/g, "");
-  const [min, max] = clean.split(/[-–]/).map((value) => Number(value));
-
-  if (Number.isNaN(min) || Number.isNaN(max)) {
-    return null;
-  }
-
-  return { min, max };
-}
-
 export function CatalogBrowser({
   locale,
   page,
@@ -66,7 +34,6 @@ export function CatalogBrowser({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategory ?? null);
-  const [ageFilter, setAgeFilter] = useState<(typeof ageGroups)[number]["id"]>("all");
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -97,22 +64,9 @@ export function CatalogBrowser({
         return false;
       }
 
-      if (ageFilter !== "all") {
-        const selectedRange = ageGroups.find((item) => item.id === ageFilter);
-        const parsed = parseAgeRange(product.ageRange);
-
-        if (!selectedRange || !parsed || selectedRange.min === null || selectedRange.max === null) {
-          return false;
-        }
-
-        if (parsed.max < selectedRange.min || parsed.min > selectedRange.max) {
-          return false;
-        }
-      }
-
       return true;
     });
-  }, [ageFilter, categoryFilter, products]);
+  }, [categoryFilter, products]);
 
   return (
     <div className="flex gap-8">
@@ -156,28 +110,6 @@ export function CatalogBrowser({
               </button>
             ))}
           </div>
-
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--color-muted-foreground)]">
-            {page.ageRangeLabel}
-          </p>
-          <div className="flex flex-col gap-1">
-            {ageGroups.map((group) => (
-              <button
-                key={group.id}
-                className={`rounded-xl px-3 py-2 text-left text-sm transition-colors ${
-                  ageFilter === group.id
-                    ? "bg-[var(--color-primary)] font-semibold text-white"
-                    : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-panel)] hover:text-[var(--color-foreground)]"
-                }`}
-                onClick={() => setAgeFilter(group.id)}
-                type="button"
-              >
-                {group.id === "all"
-                  ? page.allLabel
-                  : `${group.id} ${yearsSuffixByLocale[locale]}`}
-              </button>
-            ))}
-          </div>
         </div>
       </aside>
 
@@ -197,7 +129,7 @@ export function CatalogBrowser({
             )}
           </button>
           {showFilters ? (
-            <div className="mt-4 grid grid-cols-2 gap-6 rounded-2xl border border-[var(--color-border)] bg-white p-4">
+            <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-white p-4">
               <div>
                 <p className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--color-muted-foreground)]">
                   {page.categoryLabel}
@@ -233,29 +165,6 @@ export function CatalogBrowser({
                       type="button"
                     >
                       {category.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                  {page.ageRangeLabel}
-                </p>
-                <div className="flex flex-col gap-1">
-                  {ageGroups.map((group) => (
-                    <button
-                      key={group.id}
-                      className={`rounded-lg px-2 py-1.5 text-left text-xs ${
-                        ageFilter === group.id
-                          ? "bg-[var(--color-primary)] font-bold text-white"
-                          : "text-[var(--color-muted-foreground)]"
-                      }`}
-                      onClick={() => setAgeFilter(group.id)}
-                      type="button"
-                    >
-                      {group.id === "all"
-                        ? page.allLabel
-                        : `${group.id} ${yearsSuffixByLocale[locale]}`}
                     </button>
                   ))}
                 </div>
@@ -321,9 +230,6 @@ export function CatalogBrowser({
                   >
                     {product.name}
                   </h3>
-                  <p className="mb-3 text-xs text-[var(--color-muted-foreground)]">
-                    {agePrefixByLocale[locale]} {product.ageRange}
-                  </p>
                   <div className="mt-5 flex items-center justify-between gap-4">
                     <span className="text-sm font-bold text-[var(--color-primary)]">
                       {product.priceLabel}
