@@ -274,9 +274,11 @@ export type AboutPage = {
   factoryLocationLabel: string;
   factoryAddress: string;
   factoryStats: StatItem[];
+  showTeamSection: boolean;
   teamEyebrow: string;
   teamTitle: string;
   teamMembers: TeamMember[];
+  showCertificationsSection: boolean;
   certificationsEyebrow: string;
   certificationsTitle: string;
   certifications: Badge[];
@@ -1072,11 +1074,14 @@ function mapAboutPage(value: unknown): AboutPage | null {
     values: Array.isArray(page.values) ? page.values : [],
     factoryImage: mapMediaImage(page.factoryImage, page.factoryTitle),
     factoryStats: Array.isArray(page.factoryStats) ? page.factoryStats : [],
+    showTeamSection: typeof page.showTeamSection === "boolean" ? page.showTeamSection : true,
     teamMembers: Array.isArray(page.teamMembers)
       ? page.teamMembers
           .map((entry) => mapTeamMember(entry))
           .filter((entry): entry is TeamMember => Boolean(entry))
       : [],
+    showCertificationsSection:
+      typeof page.showCertificationsSection === "boolean" ? page.showCertificationsSection : true,
     certifications: Array.isArray(page.certifications) ? page.certifications : [],
     safetyBadges: Array.isArray(page.safetyBadges) ? page.safetyBadges : [],
   };

@@ -224,85 +224,95 @@ export default async function AboutPage({ params }: PageProps) {
         </div>
       </section>
 
-      <section className="bg-[var(--color-surface-strong)] py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-14">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-accent)]">
-              {page.teamEyebrow}
-            </p>
-            <h2 className="font-display text-4xl font-bold text-white md:text-5xl">
-              {page.teamTitle}
+      {page.showTeamSection ? (
+        <section className="bg-[var(--color-surface-strong)] py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mb-14">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-accent)]">
+                {page.teamEyebrow}
+              </p>
+              <h2 className="font-display text-4xl font-bold text-white md:text-5xl">
+                {page.teamTitle}
+              </h2>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {page.teamMembers.map((member) => (
+                <div
+                  key={member.name}
+                  className="overflow-hidden rounded-3xl border border-white/10 bg-white/5"
+                >
+                  <div className="relative aspect-square overflow-hidden bg-white/5">
+                    {member.avatar ? (
+                      <img
+                        alt={member.avatar.alt}
+                        className="h-full w-full object-cover opacity-80"
+                        src={member.avatar.url}
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+                  <div className="p-6">
+                    <p className="font-display mb-0.5 text-sm font-bold text-white">
+                      {member.name}
+                    </p>
+                    <p className="mb-3 text-xs font-medium text-[var(--color-accent)]">
+                      {member.role}
+                    </p>
+                    <p className="text-xs leading-relaxed text-white/50">{member.bio}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {page.showCertificationsSection ? (
+        <section className="mx-auto grid max-w-7xl gap-16 px-6 py-24 md:grid-cols-2 md:items-start">
+          <div>
+            <p className="eyebrow">{page.certificationsEyebrow}</p>
+            <h2 className="font-display mb-8 text-4xl font-bold md:text-5xl">
+              {page.certificationsTitle}
             </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {page.teamMembers.map((member) => (
-              <div
-                key={member.name}
-                className="overflow-hidden rounded-3xl border border-white/10 bg-white/5"
-              >
-                <div className="relative aspect-square overflow-hidden bg-white/5">
-                  {member.avatar ? (
-                    <img
-                      alt={member.avatar.alt}
-                      className="h-full w-full object-cover opacity-80"
-                      src={member.avatar.url}
-                    />
-                  ) : null}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="flex flex-col gap-3">
+              {page.certifications.map((certification) => (
+                <div
+                  key={certification.label}
+                  className="flex items-start gap-3 rounded-3xl bg-[var(--color-panel)] p-4"
+                >
+                  <span className="mt-0.5 shrink-0 text-[var(--color-primary)]">✓</span>
+                  <span className="text-sm">{certification.label}</span>
                 </div>
-                <div className="p-6">
-                  <p className="font-display mb-0.5 text-sm font-bold text-white">{member.name}</p>
-                  <p className="mb-3 text-xs font-medium text-[var(--color-accent)]">
-                    {member.role}
-                  </p>
-                  <p className="text-xs leading-relaxed text-white/50">{member.bio}</p>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-[var(--color-primary)] p-10 text-white">
+            <div className="mb-6 text-5xl">{page.safetyCalloutIcon}</div>
+            <h3 className="font-display mb-4 whitespace-pre-line text-2xl font-bold">
+              {page.safetyCalloutTitle}
+            </h3>
+            <p className="mb-8 leading-relaxed text-white/72">{page.safetyCalloutDescription}</p>
+            <div className="grid grid-cols-3 gap-4">
+              {page.safetyBadges.map((badge) => (
+                <div
+                  key={badge.label}
+                  className="rounded-xl bg-white/20 py-2 text-center text-xs font-bold"
+                >
+                  {badge.label}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      <section className="mx-auto grid max-w-7xl gap-16 px-6 py-24 md:grid-cols-2 md:items-start">
-        <div>
-          <p className="eyebrow">{page.certificationsEyebrow}</p>
-          <h2 className="font-display mb-8 text-4xl font-bold md:text-5xl">
-            {page.certificationsTitle}
-          </h2>
-          <div className="flex flex-col gap-3">
-            {page.certifications.map((certification) => (
-              <div
-                key={certification.label}
-                className="flex items-start gap-3 rounded-3xl bg-[var(--color-panel)] p-4"
-              >
-                <span className="mt-0.5 shrink-0 text-[var(--color-primary)]">✓</span>
-                <span className="text-sm">{certification.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl bg-[var(--color-primary)] p-10 text-white">
-          <div className="mb-6 text-5xl">{page.safetyCalloutIcon}</div>
-          <h3 className="font-display mb-4 whitespace-pre-line text-2xl font-bold">
-            {page.safetyCalloutTitle}
-          </h3>
-          <p className="mb-8 leading-relaxed text-white/72">{page.safetyCalloutDescription}</p>
-          <div className="grid grid-cols-3 gap-4">
-            {page.safetyBadges.map((badge) => (
-              <div
-                key={badge.label}
-                className="rounded-xl bg-white/20 py-2 text-center text-xs font-bold"
-              >
-                {badge.label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-6 mb-24 overflow-hidden rounded-3xl bg-[var(--color-secondary)]">
+      <section
+        className={`mx-6 overflow-hidden rounded-3xl bg-[var(--color-secondary)] ${
+          page.showCertificationsSection ? "mb-24" : "mt-24 mb-24"
+        }`}
+      >
         <div className="relative">
           <div className="absolute inset-0 opacity-10">
             {Array.from({ length: 8 }).map((_, index) => (
