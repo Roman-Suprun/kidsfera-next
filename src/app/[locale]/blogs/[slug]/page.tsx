@@ -89,6 +89,8 @@ export default async function BlogPostPage({ params }: PageProps) {
     )
     .slice(0, 3);
   const categoryColor = post.category?.color ?? "#FF4500";
+  const hasAuthor = post.authorName.length > 0;
+  const hasAuthorRole = post.authorRole.length > 0;
 
   return (
     <section className="page-offset min-h-screen bg-[var(--color-background)]">
@@ -127,23 +129,31 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="mb-10 flex flex-wrap items-center gap-5 border-b border-[var(--color-border)] pb-8">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold"
-              style={{
-                backgroundColor: `${categoryColor}30`,
-                color: categoryColor,
-              }}
-            >
-              {post.authorName.charAt(0)}
+          {hasAuthor ? (
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold"
+                style={{
+                  backgroundColor: `${categoryColor}30`,
+                  color: categoryColor,
+                }}
+              >
+                {post.authorName.charAt(0)}
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{post.authorName}</p>
+                {hasAuthorRole ? (
+                  <p className="text-xs text-[var(--color-muted-foreground)]">
+                    {post.authorRole}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold">{post.authorName}</p>
-              <p className="text-xs text-[var(--color-muted-foreground)]">{post.authorRole}</p>
-            </div>
-          </div>
+          ) : null}
 
-          <div className="ml-auto flex flex-wrap items-center gap-4 text-xs text-[var(--color-muted-foreground)]">
+          <div
+            className={`${hasAuthor ? "ml-auto " : ""}flex flex-wrap items-center gap-4 text-xs text-[var(--color-muted-foreground)]`}
+          >
             <span className="inline-flex items-center gap-1.5">
               <CalendarIcon className="h-3.5 w-3.5" />
               {formatBlogDate(typedLocale, post.publishDate)}
@@ -173,21 +183,25 @@ export default async function BlogPostPage({ params }: PageProps) {
           ))}
         </div>
 
-        <div className="mt-16 flex items-start gap-5 rounded-[2rem] bg-[var(--color-panel)] p-8">
-          <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white"
-            style={{ backgroundColor: categoryColor }}
-          >
-            {post.authorName.charAt(0)}
+        {hasAuthor ? (
+          <div className="mt-16 flex items-start gap-5 rounded-[2rem] bg-[var(--color-panel)] p-8">
+            <div
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white"
+              style={{ backgroundColor: categoryColor }}
+            >
+              {post.authorName.charAt(0)}
+            </div>
+            <div>
+              <p className="mb-1 text-xs uppercase tracking-widest text-[var(--color-muted-foreground)]">
+                {page.authorLabel}
+              </p>
+              <p className="font-bold">{post.authorName}</p>
+              {hasAuthorRole ? (
+                <p className="text-sm text-[var(--color-muted-foreground)]">{post.authorRole}</p>
+              ) : null}
+            </div>
           </div>
-          <div>
-            <p className="mb-1 text-xs uppercase tracking-widest text-[var(--color-muted-foreground)]">
-              {page.authorLabel}
-            </p>
-            <p className="font-bold">{post.authorName}</p>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{post.authorRole}</p>
-          </div>
-        </div>
+        ) : null}
 
         {relatedPosts.length ? (
           <div className="mt-16">

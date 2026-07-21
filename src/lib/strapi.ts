@@ -1036,6 +1036,8 @@ function mapBlogPost(value: unknown): BlogPost | null {
 
   return {
     ...post,
+    authorName: typeof post.authorName === "string" ? post.authorName.trim() : "",
+    authorRole: typeof post.authorRole === "string" ? post.authorRole.trim() : "",
     seo: mapSeo(post.seo),
     coverImage: mapMediaImage(post.coverImage, post.title),
     bodySections: Array.isArray(post.bodySections) ? post.bodySections : [],

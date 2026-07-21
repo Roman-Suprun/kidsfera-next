@@ -39,6 +39,8 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
   const remainingPosts = featuredPost
     ? filteredPosts.filter((post) => post.slug !== featuredPost.slug)
     : [];
+  const featuredHasAuthor = featuredPost?.authorName.length ? true : false;
+  const featuredHasAuthorRole = featuredPost?.authorRole.length ? true : false;
 
   function getCategory(slug: string | null | undefined) {
     return categories.find((category) => category.slug === slug) ?? null;
@@ -142,13 +144,21 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
                 </p>
               </div>
 
-              <div className="mt-8 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold">{featuredPost.authorName}</p>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">
-                    {featuredPost.authorRole}
-                  </p>
-                </div>
+              <div
+                className={`mt-8 flex items-center gap-4 ${
+                  featuredHasAuthor ? "justify-between" : "justify-end"
+                }`}
+              >
+                {featuredHasAuthor ? (
+                  <div>
+                    <p className="text-xs font-semibold">{featuredPost.authorName}</p>
+                    {featuredHasAuthorRole ? (
+                      <p className="text-xs text-[var(--color-muted-foreground)]">
+                        {featuredPost.authorRole}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <span className="flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] transition-all group-hover:gap-2">
                   {page.readMoreLabel}
                   <ArrowRightIcon className="h-3 w-3" />
@@ -162,6 +172,7 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {remainingPosts.map((post) => {
               const category = getCategory(post.category?.slug);
+              const hasAuthor = post.authorName.length > 0;
 
               return (
                 <Link
@@ -201,10 +212,16 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
                     <p className="line-clamp-3 flex-1 text-xs leading-relaxed text-[var(--color-muted-foreground)]">
                       {post.excerpt}
                     </p>
-                    <div className="mt-5 flex items-center justify-between gap-4 border-t border-[var(--color-border)] pt-4">
-                      <p className="text-xs text-[var(--color-muted-foreground)]">
-                        {post.authorName}
-                      </p>
+                    <div
+                      className={`mt-5 flex items-center gap-4 border-t border-[var(--color-border)] pt-4 ${
+                        hasAuthor ? "justify-between" : "justify-end"
+                      }`}
+                    >
+                      {hasAuthor ? (
+                        <p className="text-xs text-[var(--color-muted-foreground)]">
+                          {post.authorName}
+                        </p>
+                      ) : null}
                       <span className="flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] transition-all group-hover:gap-2">
                         {page.readMoreLabel}
                         <ArrowRightIcon className="h-2.5 w-2.5" />
