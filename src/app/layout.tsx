@@ -18,6 +18,13 @@ const displayFont = Unbounded({
 export const metadata: Metadata = {
   title: "Kidsfera",
   description: "Multilingual kids attraction storefront powered by Strapi.",
+  icons: {
+    icon: [
+      { url: "/favicon-kidsfera.ico?v=2", sizes: "any" },
+      { url: "/icon.svg?v=2", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico?v=2",
+  },
 };
 
 export default function RootLayout({
