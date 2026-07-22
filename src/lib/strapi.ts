@@ -382,6 +382,7 @@ export type BlogCategory = {
 export type BlogPost = {
   id?: number;
   documentId?: string;
+  updatedAt?: string | null;
   title: string;
   slug: string;
   excerpt: string;
@@ -430,6 +431,7 @@ export type Category = {
 export type Product = {
   id?: number;
   documentId?: string;
+  updatedAt?: string | null;
   name: string;
   slug: string;
   shortDescription: string;
@@ -468,6 +470,7 @@ export type FeedbackSummary = {
 export type Project = {
   id?: number;
   documentId?: string;
+  updatedAt?: string | null;
   title: string;
   slug: string;
   subtitle: string;
@@ -1514,6 +1517,30 @@ export async function getProductBySlug(locale: Locale, slug: string) {
   return mapProduct(product);
 }
 
+export function getSiteOrigin() {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+  if (!configuredUrl) {
+    return "http://localhost:3000";
+  }
+
+  const candidate = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(configuredUrl)
+    ? configuredUrl
+    : `https://${configuredUrl}`;
+
+  try {
+    const url = new URL(candidate);
+
+    url.pathname = "/";
+    url.search = "";
+    url.hash = "";
+
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return "http://localhost:3000";
+  }
+}
+
 export function getBaseSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? `http://localhost:3000/${defaultLocale}`;
+  return process.env.NEXT_PUBLIC_SITE_URL ?? getSiteOrigin();
 }
