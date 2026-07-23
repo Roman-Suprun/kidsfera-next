@@ -16,11 +16,12 @@ import {
 } from "@/components/icons";
 import { MailtoContactForm } from "@/components/mailto-contact-form";
 import { MailtoLink } from "@/components/mailto-link";
-import { isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
+import { defaultItemsLabelByLocale, isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 import {
   getBaseSiteUrl,
   getCategories,
+  getCatalogPage,
   getCategoriesPage,
   getHomePage,
   getProducts,
@@ -179,7 +180,7 @@ export default async function HomePage({ params }: PageProps) {
 
   const typedLocale = locale as Locale;
 
-  const [page, categories, products, projects, testimonials, categoriesPage, settings] =
+  const [page, categories, products, projects, testimonials, categoriesPage, catalogPage, settings] =
     await Promise.all([
       getHomePage(typedLocale),
       getCategories(typedLocale),
@@ -187,6 +188,7 @@ export default async function HomePage({ params }: PageProps) {
       getProjects(typedLocale),
       getTestimonials(typedLocale),
       getCategoriesPage(typedLocale),
+      getCatalogPage(typedLocale),
       getSiteSettings(typedLocale),
     ]);
 
@@ -209,6 +211,7 @@ export default async function HomePage({ params }: PageProps) {
   };
   const previewCategories = categories.slice(0, 6);
   const productCountByCategory = new Map<string, number>();
+  const itemsLabel = catalogPage?.itemsLabel ?? defaultItemsLabelByLocale[typedLocale];
 
   for (const product of products) {
     for (const category of product.categories) {
@@ -360,7 +363,7 @@ export default async function HomePage({ params }: PageProps) {
                   {category.name}
                 </p>
                 <p className="mt-0.5 text-xs text-white/50">
-                  {productCountByCategory.get(category.slug) ?? 0} items
+                  {productCountByCategory.get(category.slug) ?? 0} {itemsLabel}
                 </p>
               </div>
             </Link>

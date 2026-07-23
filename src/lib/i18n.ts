@@ -18,6 +18,13 @@ export const localeFlags: Record<Locale, string> = {
   pl: "🇵🇱",
 };
 
+export const defaultItemsLabelByLocale: Record<Locale, string> = {
+  en: "items",
+  uk: "товарів",
+  ru: "товаров",
+  pl: "pozycji",
+};
+
 const localePathPattern = new RegExp(`^/(${locales.join("|")})(?=/|$)`);
 
 export function isLocale(value: string): value is Locale {
