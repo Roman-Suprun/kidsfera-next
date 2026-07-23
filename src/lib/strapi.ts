@@ -1337,16 +1337,17 @@ export const getProjectsPage = cache(async (locale: Locale) => {
   return mapProjectsPage(normalizeSingle<RawProjectsPage>(payload));
 });
 
-export const getProductPageLabels = cache(async (locale: Locale) => {
+export async function getProductPageLabels(locale: Locale) {
   const query = baseQuery(locale);
 
   const payload = await strapiFetch<StrapiEnvelope<ProductPageLabels | null>>(
     "/api/product-page",
     query,
+    { cache: "no-store" },
   );
 
   return normalizeSingle<ProductPageLabels>(payload);
-});
+}
 
 export const getCategories = cache(async (locale: Locale) => {
   const query = sortCollection(baseQuery(locale));
