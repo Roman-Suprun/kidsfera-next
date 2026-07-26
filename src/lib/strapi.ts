@@ -738,6 +738,46 @@ function sortCollection(query: URLSearchParams) {
   return query;
 }
 
+function buildSiteSettingsQuery(targetLocale: Locale) {
+  const query = baseQuery(targetLocale);
+  setPopulate(query, "populate[defaultSeo][populate][0]", "ogImage");
+  setPopulate(query, "populate[socialLinks]", true);
+  setPopulate(query, "populate[footerLinkGroups][populate][items]", true);
+  setPopulate(query, "populate[footerBadges]", true);
+  return query;
+}
+
+function buildProductsQuery(locale: Locale) {
+  const query = sortCollection(baseQuery(locale));
+  setPopulate(query, "populate[gallery][populate][0]", "image");
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+  setPopulate(query, "populate[category][populate][0]", "image");
+  return query;
+}
+
+function buildBlogPostsQuery(locale: Locale) {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[coverImage]", true);
+  setPopulate(query, "populate[seo][populate][0]", "ogImage");
+  setPopulate(query, "populate[category]", true);
+  setPopulate(query, "populate[bodySections][populate][0]", false);
+  query.append("sort[0]", "sortOrder:asc");
+  query.append("sort[1]", "publishDate:desc");
+  return query;
+}
+
+function buildProjectsQuery(locale: Locale) {
+  const query = baseQuery(locale);
+  setPopulate(query, "populate[image]", true);
+  setPopulate(query, "populate[projectType][populate][0]", "image");
+  setPopulate(query, "populate[gallery][populate][0]", "image");
+  setPopulate(query, "populate[testimonial][populate][0]", false);
+  setPopulate(query, "populate[usedProducts][populate][gallery][populate][0]", "image");
+  query.append("sort[0]", "sortOrder:asc");
+  query.append("sort[1]", "title:asc");
+  return query;
+}
+
 function mapSeo(value: unknown): Seo | null {
   const seo = value as RawSeo | null;
 
@@ -1164,28 +1204,19 @@ function mapSiteSettings(value: unknown): SiteSettings | null {
   };
 }
 
-export const getSiteSettings = cache(async (locale: Locale) => {
-  const buildSiteSettingsQuery = (targetLocale: Locale) => {
-    const query = baseQuery(targetLocale);
-    setPopulate(query, "populate[defaultSeo][populate][0]", "ogImage");
-    setPopulate(query, "populate[socialLinks]", true);
-    setPopulate(query, "populate[footerLinkGroups][populate][items]", true);
-    setPopulate(query, "populate[footerBadges]", true);
-    return query;
-  };
-
+async function fetchSiteSettings(locale: Locale, options?: StrapiFetchOptions) {
   const [localizedPayload, sharedPayload] = await Promise.all([
     strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
       "/api/site-setting",
       buildSiteSettingsQuery(locale),
-      { cache: "no-store" },
+      options,
     ),
     locale === defaultLocale
       ? Promise.resolve(null)
       : strapiFetch<StrapiEnvelope<RawSiteSettings | null>>(
           "/api/site-setting",
           buildSiteSettingsQuery(defaultLocale),
-          { cache: "no-store" },
+          options,
         ),
   ]);
 
@@ -1204,7 +1235,13 @@ export const getSiteSettings = cache(async (locale: Locale) => {
     ...localizedSettings,
     languageSwitcherLocales: sharedSettings?.languageSwitcherLocales ?? localizedSettings.languageSwitcherLocales,
   };
-});
+}
+
+export const getSiteSettings = cache(async (locale: Locale) => fetchSiteSettings(locale, { cache: "no-store" }));
+
+export async function getFreshSiteSettings(locale: Locale) {
+  return fetchSiteSettings(locale, { cache: "no-store" });
+}
 
 export const getHomePage = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
@@ -1377,50 +1414,55 @@ export const getBlogCategories = cache(async (locale: Locale) => {
     .filter((entry): entry is BlogCategory => Boolean(entry));
 });
 
-export const getProducts = cache(async (locale: Locale) => {
-  const query = sortCollection(baseQuery(locale));
-  setPopulate(query, "populate[gallery][populate][0]", "image");
-  setPopulate(query, "populate[seo][populate][0]", "ogImage");
-  setPopulate(query, "populate[category][populate][0]", "image");
-
+async function fetchProducts(locale: Locale, options?: StrapiFetchOptions) {
   const payload = await strapiFetch<StrapiEnvelope<RawProduct[]>>(
     "/api/products",
-    query,
+    buildProductsQuery(locale),
+    options,
   );
 
   return normalizeCollection<RawProduct>(payload).map((entry) => mapProduct(entry)!);
-});
+}
 
-export const getBlogPosts = cache(async (locale: Locale) => {
-  const query = baseQuery(locale);
-  setPopulate(query, "populate[coverImage]", true);
-  setPopulate(query, "populate[seo][populate][0]", "ogImage");
-  setPopulate(query, "populate[category]", true);
-  setPopulate(query, "populate[bodySections][populate][0]", false);
-  query.append("sort[0]", "sortOrder:asc");
-  query.append("sort[1]", "publishDate:desc");
+export const getProducts = cache(async (locale: Locale) => fetchProducts(locale));
 
-  const payload = await strapiFetch<StrapiEnvelope<RawBlogPost[]>>("/api/blog-posts", query);
+export async function getFreshProducts(locale: Locale) {
+  return fetchProducts(locale, { cache: "no-store" });
+}
+
+async function fetchBlogPosts(locale: Locale, options?: StrapiFetchOptions) {
+  const payload = await strapiFetch<StrapiEnvelope<RawBlogPost[]>>(
+    "/api/blog-posts",
+    buildBlogPostsQuery(locale),
+    options,
+  );
 
   return normalizeCollection<RawBlogPost>(payload)
     .map((entry) => mapBlogPost(entry))
     .filter((entry): entry is BlogPost => Boolean(entry));
-});
+}
 
-export const getProjects = cache(async (locale: Locale) => {
-  const query = baseQuery(locale);
-  setPopulate(query, "populate[image]", true);
-  setPopulate(query, "populate[projectType][populate][0]", "image");
-  setPopulate(query, "populate[gallery][populate][0]", "image");
-  setPopulate(query, "populate[testimonial][populate][0]", false);
-  setPopulate(query, "populate[usedProducts][populate][gallery][populate][0]", "image");
-  query.append("sort[0]", "sortOrder:asc");
-  query.append("sort[1]", "title:asc");
+export const getBlogPosts = cache(async (locale: Locale) => fetchBlogPosts(locale));
 
-  const payload = await strapiFetch<StrapiEnvelope<RawProject[]>>("/api/projects", query);
+export async function getFreshBlogPosts(locale: Locale) {
+  return fetchBlogPosts(locale, { cache: "no-store" });
+}
+
+async function fetchProjects(locale: Locale, options?: StrapiFetchOptions) {
+  const payload = await strapiFetch<StrapiEnvelope<RawProject[]>>(
+    "/api/projects",
+    buildProjectsQuery(locale),
+    options,
+  );
 
   return normalizeCollection<RawProject>(payload).map((entry) => mapProject(entry)!);
-});
+}
+
+export const getProjects = cache(async (locale: Locale) => fetchProjects(locale));
+
+export async function getFreshProjects(locale: Locale) {
+  return fetchProjects(locale, { cache: "no-store" });
+}
 
 export async function getProjectBySlug(locale: Locale, slug: string) {
   const projects = await getProjects(locale);
