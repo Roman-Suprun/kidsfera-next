@@ -5,7 +5,7 @@ import Image from "next/image";
 
 import { ArrowRightIcon, ChevronRightIcon } from "@/components/icons";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
+import { defaultItemsLabelByLocale, isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getCategories,
@@ -72,7 +72,7 @@ export default async function CategoriesPage({ params }: PageProps) {
     }
   }
 
-  const itemsLabel = catalogPage?.itemsLabel ?? "items";
+  const itemsLabel = catalogPage?.itemsLabel ?? defaultItemsLabelByLocale[typedLocale];
 
   return (
     <div className="page-offset min-h-screen bg-[var(--color-background)]">
