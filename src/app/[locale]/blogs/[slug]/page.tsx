@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { CalendarIcon, ChevronLeftIcon, ClockIcon } from "@/components/icons";
+import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, locales, type Locale, withLocale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getBlogPage,
@@ -32,14 +33,7 @@ function formatBlogDate(locale: Locale, isoDate: string) {
 }
 
 export async function generateStaticParams() {
-  const params = [];
-
-  for (const locale of locales) {
-    const posts = await getBlogPosts(locale);
-    params.push(...posts.map((post) => ({ locale, slug: post.slug })));
-  }
-
-  return params;
+  return getLocalizedStaticParams(getBlogPosts);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

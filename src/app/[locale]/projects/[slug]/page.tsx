@@ -12,12 +12,13 @@ import {
 import { ProjectHeroGallery } from "@/components/project-hero-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
+import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import {
   inferProjectThemeColor,
   projectPageCopy,
 } from "@/lib/project-presentation";
-import { isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getProductPageLabels,
@@ -48,15 +49,7 @@ function buildProjectInquiryMessage(
 }
 
 export async function generateStaticParams() {
-  const params = [];
-
-  for (const locale of locales) {
-    const projects = await getProjects(locale);
-
-    params.push(...projects.map((project) => ({ locale, slug: project.slug })));
-  }
-
-  return params;
+  return getLocalizedStaticParams(getProjects);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

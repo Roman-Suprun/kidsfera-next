@@ -13,6 +13,7 @@ import { FeedbackSection } from "@/components/feedback-section";
 import { ProductGallery } from "@/components/product-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
+import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
@@ -27,6 +28,10 @@ import {
 type PageProps = {
   params: Promise<{ locale: string; slug: string }>;
 };
+
+export async function generateStaticParams() {
+  return getLocalizedStaticParams(getProducts);
+}
 
 const homeBreadcrumbLabels: Record<Locale, string> = {
   en: "Home",
@@ -138,10 +143,6 @@ function buildQuotePrefillMessage(
     `${copy.categoriesLabel}: ${product.categories.map((category) => category.name).join(", ") || "-"}`,
     `${copy.priceLabel}: ${product.priceLabel}`,
   ].join("\n");
-}
-
-export async function generateStaticParams() {
-  return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

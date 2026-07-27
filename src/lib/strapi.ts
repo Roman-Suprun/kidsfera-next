@@ -1561,29 +1561,35 @@ export async function getProductBySlug(locale: Locale, slug: string) {
 }
 
 export function getSiteOrigin() {
-  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const candidates = [
+    process.env.NEXT_PUBLIC_SITE_URL?.trim(),
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim(),
+    process.env.VERCEL_URL?.trim(),
+  ].filter((value): value is string => Boolean(value));
 
-  if (!configuredUrl) {
-    return "http://localhost:3000";
+  for (const configuredUrl of candidates) {
+    const candidate = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(configuredUrl)
+      ? configuredUrl
+      : `https://${configuredUrl}`;
+
+    try {
+      const url = new URL(candidate);
+
+      url.pathname = "/";
+      url.search = "";
+      url.hash = "";
+
+      return url.toString().replace(/\/$/, "");
+    } catch {
+      continue;
+    }
   }
 
-  const candidate = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(configuredUrl)
-    ? configuredUrl
-    : `https://${configuredUrl}`;
-
-  try {
-    const url = new URL(candidate);
-
-    url.pathname = "/";
-    url.search = "";
-    url.hash = "";
-
-    return url.toString().replace(/\/$/, "");
-  } catch {
-    return "http://localhost:3000";
-  }
+  return process.env.NODE_ENV === "production"
+    ? "https://kidsfera.com"
+    : "http://localhost:3000";
 }
 
 export function getBaseSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? getSiteOrigin();
+  return getSiteOrigin();
 }

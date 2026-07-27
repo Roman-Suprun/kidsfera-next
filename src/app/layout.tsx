@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Inter, Unbounded } from "next/font/google";
+
+import { browserLanguageFallbackLocale, isLocale } from "@/lib/i18n";
+import { getSiteOrigin } from "@/lib/strapi";
 
 import "./globals.css";
 
@@ -18,6 +22,7 @@ const displayFont = Unbounded({
 export const metadata: Metadata = {
   title: "Kidsfera",
   description: "Multilingual kids attraction storefront powered by Strapi.",
+  metadataBase: new URL(getSiteOrigin()),
   icons: {
     icon: [
       { url: "/favicon-kidsfera.ico?v=2", sizes: "any" },
@@ -27,14 +32,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerStore = await headers();
+  const localeHeader = headerStore.get("x-kidsfera-locale");
+  const htmlLang =
+    localeHeader && isLocale(localeHeader) ? localeHeader : browserLanguageFallbackLocale;
+
   return (
     <html
-      lang="en"
+      lang={htmlLang}
       className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>

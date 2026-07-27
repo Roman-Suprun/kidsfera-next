@@ -16,7 +16,8 @@ import {
 } from "@/components/icons";
 import { MailtoContactForm } from "@/components/mailto-contact-form";
 import { MailtoLink } from "@/components/mailto-link";
-import { defaultItemsLabelByLocale, isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
+import { defaultItemsLabelByLocale, isLocale, type Locale, withLocale } from "@/lib/i18n";
+import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import {
   getBaseSiteUrl,
@@ -140,7 +141,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getEnabledLocaleStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
