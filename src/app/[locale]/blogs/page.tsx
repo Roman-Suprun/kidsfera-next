@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { BlogsBrowser } from "@/components/blogs-browser";
+import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, locales, type Locale } from "@/lib/i18n";
+import { isLocale, type Locale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getBlogCategories,
@@ -16,7 +17,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getEnabledLocaleStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

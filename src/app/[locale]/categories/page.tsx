@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { ArrowRightIcon, ChevronRightIcon } from "@/components/icons";
+import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { defaultItemsLabelByLocale, isLocale, type Locale, locales, withLocale } from "@/lib/i18n";
+import { defaultItemsLabelByLocale, isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getCategories,
@@ -19,7 +20,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getEnabledLocaleStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

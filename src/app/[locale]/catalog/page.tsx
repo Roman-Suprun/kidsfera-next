@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { CatalogBrowser } from "@/components/catalog-browser";
+import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, type Locale, locales } from "@/lib/i18n";
+import { isLocale, type Locale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getCatalogPage,
@@ -17,7 +18,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getEnabledLocaleStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

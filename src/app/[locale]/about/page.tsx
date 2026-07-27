@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { ArrowRightIcon } from "@/components/icons";
+import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { getBaseSiteUrl, getAboutPage } from "@/lib/strapi";
-import { isLocale, locales, type Locale, withLocale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -42,7 +43,7 @@ function localizeHref(locale: Locale, href: string) {
 }
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getEnabledLocaleStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
