@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { DeliveryPaymentTermsPage } from "@/components/delivery-payment-terms-page";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { getBaseSiteUrl, getDeliveryPaymentPage } from "@/lib/strapi";
@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.title,
     description: page.subtitle,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, "/delivery-payment"),
   });
 }
 

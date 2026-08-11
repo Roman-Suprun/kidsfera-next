@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ProjectsBrowser } from "@/components/projects-browser";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import { getBaseSiteUrl, getProjects, getProjectsPage } from "@/lib/strapi";
 
 type PageProps = {
@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.title,
     description: page.subtitle,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, "/projects"),
   });
 }
 

@@ -53,6 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: post.title,
     description: post.excerpt,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, `/blogs/${slug}`),
   });
 }
 

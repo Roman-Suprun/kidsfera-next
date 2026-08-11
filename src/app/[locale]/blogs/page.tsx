@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { BlogsBrowser } from "@/components/blogs-browser";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getBlogCategories,
@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.heroEyebrow,
     description: page.heroSubtitle,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, "/blogs"),
   });
 }
 

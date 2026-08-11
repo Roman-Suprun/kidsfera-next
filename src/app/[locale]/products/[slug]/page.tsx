@@ -162,6 +162,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: product.name,
     description: product.shortDescription,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, `/products/${slug}`),
   });
 }
 

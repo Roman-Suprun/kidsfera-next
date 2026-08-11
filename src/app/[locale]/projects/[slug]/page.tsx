@@ -69,6 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: project.title,
     description: project.description || project.subtitle,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, `/projects/${slug}`),
   });
 }
 
