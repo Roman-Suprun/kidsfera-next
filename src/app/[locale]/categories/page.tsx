@@ -40,6 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.title,
     description: page.description,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, "/categories"),
   });
 }
 

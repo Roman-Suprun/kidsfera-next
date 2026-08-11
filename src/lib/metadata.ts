@@ -14,6 +14,7 @@ type MetadataFallback = {
   title: string;
   description: string;
   baseUrl?: string;
+  canonicalPath?: string;
 };
 
 export function buildMetadata(
@@ -24,9 +25,10 @@ export function buildMetadata(
   const description = seo?.metaDescription || fallback.description;
   const ogTitle = seo?.ogTitle || title;
   const ogDescription = seo?.ogDescription || description;
+  const canonicalPath = seo?.canonicalPath || fallback.canonicalPath;
   const canonical =
-    seo?.canonicalPath && fallback.baseUrl
-      ? new URL(seo.canonicalPath, fallback.baseUrl).toString()
+    canonicalPath && fallback.baseUrl
+      ? new URL(canonicalPath, fallback.baseUrl).toString()
       : undefined;
 
   return {

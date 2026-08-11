@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { CatalogBrowser } from "@/components/catalog-browser";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
   getCatalogPage,
@@ -38,6 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.title,
     description: page.description ?? page.title,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, "/catalog"),
   });
 }
 

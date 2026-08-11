@@ -164,6 +164,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: settings.siteName,
     description: page.heroDescription,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale),
   });
 }
 

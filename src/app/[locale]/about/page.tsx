@@ -63,6 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.heroEyebrow,
     description: page.heroDescription,
     baseUrl: getBaseSiteUrl(),
+    canonicalPath: withLocale(locale, "/about"),
   });
 }
 
