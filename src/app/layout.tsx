@@ -57,7 +57,7 @@ export default async function RootLayout({
             data-key="IKhuTwBriCKgHlX2dgjhhQ"
             id="ahrefs-analytics"
             src="https://analytics.ahrefs.com/analytics.js"
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
           />
         ) : null}
       </body>
