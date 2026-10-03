@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const page = await getCategoriesPage(locale);
+  const [page, categories] = await Promise.all([getCategoriesPage(locale), getCategories(locale)]);
 
   if (!page) {
     return {};
@@ -41,6 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.description,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, "/categories"),
+    imageUrl: categories[0]?.imageUrl,
   });
 }
 

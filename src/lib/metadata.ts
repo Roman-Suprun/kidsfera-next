@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { isPreviewDeployment } from "@/lib/strapi";
+
 type Seo = {
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -15,6 +17,8 @@ type MetadataFallback = {
   description: string;
   baseUrl?: string;
   canonicalPath?: string;
+  imageUrl?: string | null;
+  openGraphType?: "article" | "website";
 };
 
 export function buildMetadata(
@@ -30,6 +34,8 @@ export function buildMetadata(
     canonicalPath && fallback.baseUrl
       ? new URL(canonicalPath, fallback.baseUrl).toString()
       : undefined;
+  const imageUrl = seo?.ogImageUrl || fallback.imageUrl || undefined;
+  const noIndex = Boolean(seo?.noIndex) || isPreviewDeployment();
 
   return {
     title,
@@ -39,11 +45,32 @@ export function buildMetadata(
           canonical,
         }
       : undefined,
-    robots: seo?.noIndex ? { index: false, follow: false } : undefined,
+    robots: noIndex
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        },
     openGraph: {
       title: ogTitle,
       description: ogDescription,
-      images: seo?.ogImageUrl ? [{ url: seo.ogImageUrl }] : undefined,
+      url: canonical,
+      type: fallback.openGraphType ?? "website",
+      siteName: "Kidsfera",
+      images: imageUrl ? [{ url: imageUrl, alt: ogTitle }] : undefined,
+    },
+    twitter: {
+      card: imageUrl ? "summary_large_image" : "summary",
+      title: ogTitle,
+      description: ogDescription,
+      images: imageUrl ? [imageUrl] : undefined,
     },
   };
 }

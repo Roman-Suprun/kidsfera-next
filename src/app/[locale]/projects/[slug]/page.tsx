@@ -12,6 +12,7 @@ import {
 import { ProjectHeroGallery } from "@/components/project-hero-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
+import { buildBreadcrumbSchema, StructuredData } from "@/components/structured-data";
 import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import {
@@ -70,6 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: project.description || project.subtitle,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, `/projects/${slug}`),
+    imageUrl: project.gallery[0]?.url || project.imageUrl,
   });
 }
 
@@ -127,9 +129,34 @@ export default async function ProjectPage({ params }: PageProps) {
     project.projectType,
     project.location,
   );
+  const origin = getBaseSiteUrl();
+  const projectPath = withLocale(typedLocale, `/projects/${project.slug}`);
+  const structuredData = [
+    buildBreadcrumbSchema(origin, [
+      { name: "Home", path: withLocale(typedLocale) },
+      { name: copy.backToProjects, path: withLocale(typedLocale, "/projects") },
+      { name: project.title, path: projectPath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      name: project.title,
+      description: project.description || project.subtitle,
+      url: new URL(projectPath, `${origin}/`).toString(),
+      ...(uniqueGallery.length ? { image: uniqueGallery.map((image) => image.url) } : {}),
+      ...(project.location ? { contentLocation: project.location } : {}),
+      ...(project.clientName
+        ? { contributor: { "@type": "Organization", name: project.clientName } }
+        : {}),
+      ...(project.yearLabel ? { dateCreated: project.yearLabel } : {}),
+      creator: { "@id": `${origin}/#organization` },
+    },
+  ];
 
   return (
-    <section className="page-offset min-h-screen bg-[var(--color-background)]">
+    <>
+      <StructuredData data={structuredData} />
+      <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative">
         <ProjectHeroGallery images={uniqueGallery} title={project.title} />
         <div className="absolute left-6 top-6">
@@ -356,6 +383,7 @@ export default async function ProjectPage({ params }: PageProps) {
           </div>
         ) : null}
       </div>
-    </section>
+      </section>
+    </>
   );
 }

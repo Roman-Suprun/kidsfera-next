@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import { ProjectsBrowser } from "@/components/projects-browser";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const page = await getProjectsPage(locale);
+  const [page, projects] = await Promise.all([getProjectsPage(locale), getProjects(locale)]);
 
   if (!page) {
     return {};
@@ -33,6 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.subtitle,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, "/projects"),
+    imageUrl: projects[0]?.imageUrl,
   });
 }
 
@@ -53,17 +55,21 @@ export default async function ProjectsPage({ params }: PageProps) {
     notFound();
   }
 
-  const heroImage =
-    "https://images.unsplash.com/photo-1759776050712-2b7880af8cd4?w=1600&h=600&fit=crop&auto=format";
+  const heroImage = projects.find((project) => project.imageUrl)?.imageUrl;
 
   return (
     <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative h-72 overflow-hidden bg-[var(--color-surface-strong)] md:h-96">
-        <img
-          alt={page.eyebrow}
-          className="absolute inset-0 h-full w-full object-cover opacity-40"
-          src={heroImage}
-        />
+        {heroImage ? (
+          <Image
+            alt={page.eyebrow}
+            className="object-cover opacity-40"
+            fill
+            priority
+            sizes="100vw"
+            src={heroImage}
+          />
+        ) : null}
         <div className="absolute inset-0 flex w-full flex-col justify-end px-8 pb-12 md:px-16">
           <div className="mx-auto w-full max-w-7xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">

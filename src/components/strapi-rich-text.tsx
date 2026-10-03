@@ -138,15 +138,18 @@ export function StrapiRichText({ content, className }: Props) {
         if (headingMatch) {
           const [, hashes, value] = headingMatch;
           const level = hashes.length;
+          // The surrounding route already provides the document's only H1.
+          // CMS rich text begins at H2 to preserve a valid heading outline.
+          const renderedLevel = level === 1 ? 2 : level;
           const headingClassName =
-            level === 1
+            renderedLevel === 1
               ? "font-display text-3xl font-bold"
-              : level === 2
+              : renderedLevel === 2
                 ? "font-display text-2xl font-bold"
-                : level === 3
+                : renderedLevel === 3
                   ? "font-display text-xl font-semibold"
                   : "font-semibold";
-          if (level === 1) {
+          if (renderedLevel === 1) {
             return (
               <h1 key={`${index}-${value.slice(0, 24)}`} className={headingClassName}>
                 {renderInlineMarkdown(value)}
@@ -154,7 +157,7 @@ export function StrapiRichText({ content, className }: Props) {
             );
           }
 
-          if (level === 2) {
+          if (renderedLevel === 2) {
             return (
               <h2 key={`${index}-${value.slice(0, 24)}`} className={headingClassName}>
                 {renderInlineMarkdown(value)}
@@ -162,7 +165,7 @@ export function StrapiRichText({ content, className }: Props) {
             );
           }
 
-          if (level === 3) {
+          if (renderedLevel === 3) {
             return (
               <h3 key={`${index}-${value.slice(0, 24)}`} className={headingClassName}>
                 {renderInlineMarkdown(value)}
@@ -170,7 +173,7 @@ export function StrapiRichText({ content, className }: Props) {
             );
           }
 
-          if (level === 4) {
+          if (renderedLevel === 4) {
             return (
               <h4 key={`${index}-${value.slice(0, 24)}`} className={headingClassName}>
                 {renderInlineMarkdown(value)}
@@ -178,7 +181,7 @@ export function StrapiRichText({ content, className }: Props) {
             );
           }
 
-          if (level === 5) {
+          if (renderedLevel === 5) {
             return (
               <h5 key={`${index}-${value.slice(0, 24)}`} className={headingClassName}>
                 {renderInlineMarkdown(value)}
