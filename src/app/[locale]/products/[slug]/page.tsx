@@ -13,6 +13,7 @@ import { FeedbackSection } from "@/components/feedback-section";
 import { ProductGallery } from "@/components/product-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
+import { buildBreadcrumbSchema, StructuredData } from "@/components/structured-data";
 import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
@@ -163,6 +164,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: product.shortDescription,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, `/products/${slug}`),
+    imageUrl: product.gallery[0]?.url,
   });
 }
 
@@ -204,9 +206,44 @@ export default async function ProductPage({ params }: PageProps) {
   const ratingCopy = productRatingCopy[typedLocale];
   const { feedbacks, summary } = await getProductFeedback(product.documentId);
   const averageStars = summary.averageRating !== null ? Math.max(0, Math.min(5, Math.round(summary.averageRating))) : 0;
+  const origin = getBaseSiteUrl();
+  const productPath = withLocale(typedLocale, `/products/${product.slug}`);
+  const structuredData = [
+    buildBreadcrumbSchema(origin, [
+      { name: settings.siteName || homeBreadcrumbLabels[typedLocale], path: withLocale(typedLocale) },
+      { name: settings.navCatalogLabel, path: withLocale(typedLocale, "/catalog") },
+      { name: product.name, path: productPath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.shortDescription || product.description,
+      sku: product.slug,
+      url: new URL(productPath, `${origin}/`).toString(),
+      ...(product.gallery.length ? { image: product.gallery.map((image) => image.url) } : {}),
+      ...(product.categories.length
+        ? { category: product.categories.map((category) => category.name).join(", ") }
+        : {}),
+      brand: { "@id": `${origin}/#organization` },
+      ...(summary.averageRating !== null && summary.totalCount > 0
+        ? {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: summary.averageRating,
+              reviewCount: summary.totalCount,
+              bestRating: 5,
+              worstRating: 1,
+            },
+          }
+        : {}),
+    },
+  ];
 
   return (
-    <section className="page-offset min-h-screen bg-[var(--color-background)]">
+    <>
+      <StructuredData data={structuredData} />
+      <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="mb-8 flex flex-wrap items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)]">
           <Link className="transition-colors hover:text-[var(--color-foreground)]" href={withLocale(typedLocale)}>
@@ -405,6 +442,7 @@ export default async function ProductPage({ params }: PageProps) {
           />
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

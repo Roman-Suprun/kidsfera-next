@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const page = await getBlogPage(locale);
+  const [page, posts] = await Promise.all([getBlogPage(locale), getBlogPosts(locale)]);
 
   if (!page) {
     return {};
@@ -38,6 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.heroSubtitle,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, "/blogs"),
+    imageUrl: posts.find((post) => post.featured)?.coverImage?.url ?? posts[0]?.coverImage?.url,
   });
 }
 

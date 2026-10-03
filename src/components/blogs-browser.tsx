@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import { ArrowRightIcon } from "@/components/icons";
 import { type Locale, withLocale } from "@/lib/i18n";
@@ -110,9 +111,12 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
           >
             <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-panel)] md:aspect-auto">
               {featuredPost.coverImage ? (
-                <img
+                <Image
                   alt={featuredPost.coverImage.alt}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  priority
+                  sizes="(min-width: 768px) 50vw, 100vw"
                   src={featuredPost.coverImage.url}
                 />
               ) : null}
@@ -182,9 +186,11 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
                 >
                   <div className="relative aspect-[16/9] shrink-0 overflow-hidden bg-[var(--color-panel)]">
                     {post.coverImage ? (
-                      <img
+                      <Image
                         alt={post.coverImage.alt}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                         src={post.coverImage.url}
                       />
                     ) : null}

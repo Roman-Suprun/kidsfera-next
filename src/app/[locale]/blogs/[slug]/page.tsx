@@ -1,8 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { CalendarIcon, ChevronLeftIcon, ClockIcon } from "@/components/icons";
+import { buildBreadcrumbSchema, StructuredData } from "@/components/structured-data";
 import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
@@ -54,6 +56,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: post.excerpt,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, `/blogs/${slug}`),
+    imageUrl: post.coverImage?.url,
+    openGraphType: "article",
   });
 }
 
@@ -86,14 +90,43 @@ export default async function BlogPostPage({ params }: PageProps) {
   const categoryColor = post.category?.color ?? "#FF4500";
   const hasAuthor = post.authorName.length > 0;
   const hasAuthorRole = post.authorRole.length > 0;
+  const origin = getBaseSiteUrl();
+  const postPath = withLocale(typedLocale, `/blogs/${post.slug}`);
+  const structuredData = [
+    buildBreadcrumbSchema(origin, [
+      { name: "Home", path: withLocale(typedLocale) },
+      { name: page.heroTitle, path: withLocale(typedLocale, "/blogs") },
+      { name: post.title, path: postPath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.excerpt,
+      mainEntityOfPage: new URL(postPath, `${origin}/`).toString(),
+      datePublished: post.publishDate,
+      ...(post.updatedAt ? { dateModified: post.updatedAt } : {}),
+      ...(post.coverImage ? { image: [post.coverImage.url] } : {}),
+      author: hasAuthor
+        ? { "@type": "Person", name: post.authorName }
+        : { "@id": `${origin}/#organization` },
+      publisher: { "@id": `${origin}/#organization` },
+      ...(post.category ? { articleSection: post.category.name } : {}),
+    },
+  ];
 
   return (
-    <section className="page-offset min-h-screen bg-[var(--color-background)]">
+    <>
+      <StructuredData data={structuredData} />
+      <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative h-[50vh] overflow-hidden bg-[var(--color-surface-strong)]">
         {post.coverImage ? (
-          <img
+          <Image
             alt={post.coverImage.alt}
             className="h-full w-full object-cover opacity-80"
+            fill
+            priority
+            sizes="100vw"
             src={post.coverImage.url}
           />
         ) : null}
@@ -210,9 +243,11 @@ export default async function BlogPostPage({ params }: PageProps) {
                 >
                   <div className="relative aspect-video overflow-hidden bg-[var(--color-panel)]">
                     {relatedPost.coverImage ? (
-                      <img
+                      <Image
                         alt={relatedPost.coverImage.alt}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        sizes="(min-width: 640px) 33vw, 100vw"
                         src={relatedPost.coverImage.url}
                       />
                     ) : null}
@@ -241,6 +276,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </Link>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

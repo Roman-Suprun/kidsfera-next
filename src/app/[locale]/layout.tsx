@@ -3,13 +3,14 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { buildSiteSchemas, StructuredData } from "@/components/structured-data";
 import { isLocale, type Locale } from "@/lib/i18n";
 import {
   getEnabledLocales,
   getPreferredLocale,
   replaceLocaleInPath,
 } from "@/lib/locale-routing";
-import { getSiteSettings } from "@/lib/strapi";
+import { getSiteOrigin, getSiteSettings } from "@/lib/strapi";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,7 @@ export default async function LocaleLayout({
 
   return (
     <>
+      <StructuredData data={buildSiteSchemas(settings, typedLocale, getSiteOrigin())} />
       <SiteHeader locale={typedLocale} settings={settings} />
       <main>{children}</main>
       <SiteFooter locale={typedLocale} settings={settings} />

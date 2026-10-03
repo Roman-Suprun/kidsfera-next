@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Inter, Unbounded } from "next/font/google";
+import Script from "next/script";
 
 import { browserLanguageFallbackLocale, isLocale } from "@/lib/i18n";
-import { getSiteOrigin } from "@/lib/strapi";
+import { getSiteOrigin, isPreviewDeployment } from "@/lib/strapi";
 
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
   title: "Kidsfera",
   description: "Multilingual kids attraction storefront powered by Strapi.",
   metadataBase: new URL(getSiteOrigin()),
+  robots: isPreviewDeployment() ? { index: false, follow: false } : undefined,
   icons: {
     icon: [
       { url: "/favicon-kidsfera.ico?v=2", sizes: "any" },
@@ -47,7 +49,18 @@ export default async function RootLayout({
       lang={htmlLang}
       className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        {!isPreviewDeployment() ? (
+          <Script
+            async
+            data-key="IKhuTwBriCKgHlX2dgjhhQ"
+            id="ahrefs-analytics"
+            src="https://analytics.ahrefs.com/analytics.js"
+            strategy="beforeInteractive"
+          />
+        ) : null}
+      </body>
     </html>
   );
 }

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const page = await getCatalogPage(locale);
+  const [page, products] = await Promise.all([getCatalogPage(locale), getProducts(locale)]);
 
   if (!page) {
     return {};
@@ -39,6 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.description ?? page.title,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, "/catalog"),
+    imageUrl: products[0]?.gallery[0]?.url,
   });
 }
 

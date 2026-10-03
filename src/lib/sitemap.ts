@@ -1,13 +1,10 @@
 import type { MetadataRoute } from "next";
-import type { NextRequest } from "next/server";
-
 import { defaultLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
-  getFreshBlogPosts,
-  getFreshProducts,
-  getFreshProjects,
-  getFreshSiteSettings,
-  getSiteOrigin,
+  getBlogPosts,
+  getProducts,
+  getProjects,
+  getSiteSettings,
 } from "@/lib/strapi";
 
 type SitemapChangeFrequency = MetadataRoute.Sitemap[number]["changeFrequency"];
@@ -122,7 +119,7 @@ function toSitemapEntries(
 }
 
 async function getEnabledLocales(): Promise<Locale[]> {
-  const settings = await getFreshSiteSettings(defaultLocale);
+  const settings = await getSiteSettings(defaultLocale);
   const enabledLocales = settings?.languageSwitcherLocales ?? [defaultLocale];
 
   return enabledLocales.length ? [...enabledLocales] : [defaultLocale];
@@ -130,9 +127,9 @@ async function getEnabledLocales(): Promise<Locale[]> {
 
 async function getDynamicEntriesForLocale(locale: Locale): Promise<SitemapEntrySeed[]> {
   const [products, projects, blogPosts] = await Promise.all([
-    getFreshProducts(locale),
-    getFreshProjects(locale),
-    getFreshBlogPosts(locale),
+    getProducts(locale),
+    getProjects(locale),
+    getBlogPosts(locale),
   ]);
 
   return [
@@ -140,25 +137,6 @@ async function getDynamicEntriesForLocale(locale: Locale): Promise<SitemapEntryS
     ...toSitemapEntries("project", "/projects", locale, projects, "monthly", 0.7),
     ...toSitemapEntries("blog", "/blogs", locale, blogPosts, "monthly", 0.6),
   ];
-}
-
-export function getRequestOrigin(request: NextRequest) {
-  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-
-  if (forwardedHost) {
-    const protocol = forwardedProto || request.nextUrl.protocol.replace(/:$/, "") || "https";
-    return `${protocol}://${forwardedHost}`;
-  }
-
-  const host = request.headers.get("host")?.trim();
-
-  if (host) {
-    const protocol = request.nextUrl.protocol.replace(/:$/, "") || "https";
-    return `${protocol}://${host}`;
-  }
-
-  return request.nextUrl.origin || getSiteOrigin();
 }
 
 export async function getSitemapEntries(origin: string): Promise<SitemapEntry[]> {
@@ -191,9 +169,12 @@ export async function getSitemapEntries(origin: string): Promise<SitemapEntry[]>
         changeFrequency: entry.changeFrequency,
         priority: entry.priority,
         alternates: {
-          languages: Object.fromEntries(
-            siblings.map((sibling) => [sibling.locale, buildAbsoluteUrl(origin, sibling.path)]),
-          ),
+          languages: {
+            ...Object.fromEntries(
+              siblings.map((sibling) => [sibling.locale, buildAbsoluteUrl(origin, sibling.path)]),
+            ),
+            "x-default": buildAbsoluteUrl(origin, siblings[0].path),
+          },
         },
       })),
     )
