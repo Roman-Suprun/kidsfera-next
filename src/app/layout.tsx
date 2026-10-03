@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Inter, Unbounded } from "next/font/google";
+import Script from "next/script";
 
 import { browserLanguageFallbackLocale, isLocale } from "@/lib/i18n";
 import { getSiteOrigin, isPreviewDeployment } from "@/lib/strapi";
@@ -48,7 +49,18 @@ export default async function RootLayout({
       lang={htmlLang}
       className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        {!isPreviewDeployment() ? (
+          <Script
+            async
+            data-key="IKhuTwBriCKgHlX2dgjhhQ"
+            id="ahrefs-analytics"
+            src="https://analytics.ahrefs.com/analytics.js"
+            strategy="beforeInteractive"
+          />
+        ) : null}
+      </body>
     </html>
   );
 }
