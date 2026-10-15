@@ -208,13 +208,16 @@ export default async function ProductPage({ params }: PageProps) {
   const averageStars = summary.averageRating !== null ? Math.max(0, Math.min(5, Math.round(summary.averageRating))) : 0;
   const origin = getBaseSiteUrl();
   const productPath = withLocale(typedLocale, `/products/${product.slug}`);
-  const structuredData = [
+  const structuredData: Array<Record<string, unknown>> = [
     buildBreadcrumbSchema(origin, [
       { name: settings.siteName || homeBreadcrumbLabels[typedLocale], path: withLocale(typedLocale) },
       { name: settings.navCatalogLabel, path: withLocale(typedLocale, "/catalog") },
       { name: product.name, path: productPath },
     ]),
-    {
+  ];
+
+  if (summary.averageRating !== null && summary.totalCount > 0) {
+    structuredData.push({
       "@context": "https://schema.org",
       "@type": "Product",
       name: product.name,
@@ -226,19 +229,15 @@ export default async function ProductPage({ params }: PageProps) {
         ? { category: product.categories.map((category) => category.name).join(", ") }
         : {}),
       brand: { "@id": `${origin}/#organization` },
-      ...(summary.averageRating !== null && summary.totalCount > 0
-        ? {
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: summary.averageRating,
-              reviewCount: summary.totalCount,
-              bestRating: 5,
-              worstRating: 1,
-            },
-          }
-        : {}),
-    },
-  ];
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: summary.averageRating,
+        reviewCount: summary.totalCount,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    });
+  }
 
   return (
     <>
