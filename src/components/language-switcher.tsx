@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import {
   localeFlags,
   localeLabels,
-  locales,
   stripLocaleFromPath,
   type Locale,
   withLocale,
@@ -18,13 +17,15 @@ type Props = {
   visibleLocales?: readonly Locale[];
 };
 
-export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
+export function LanguageSwitcher({ locale, visibleLocales = [] }: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() ?? withLocale(locale);
+  const searchParams = useSearchParams();
   const localizedPath = stripLocaleFromPath(pathname);
   const ref = useRef<HTMLDivElement>(null);
-  const dropdownLocales = visibleLocales.length ? visibleLocales : locales;
+  const dropdownLocales = Array.from(new Set([locale, ...visibleLocales]));
   const switchableLocales = dropdownLocales.filter((item) => item !== locale);
+  const query = searchParams.toString();
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -63,12 +64,14 @@ export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
       {open && switchableLocales.length ? (
         <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[170px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white shadow-[0_18px_40px_rgba(20,18,16,0.14)]">
           {switchableLocales.map((item) => {
-            const href = withLocale(item, localizedPath);
+            const href = `${withLocale(item, localizedPath)}${query ? `?${query}` : ""}`;
 
             return (
               <Link
                 key={item}
                 href={href}
+                hrefLang={item}
+                lang={item}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-muted-foreground)] transition-colors hover:bg-[var(--color-panel)] hover:text-[var(--color-foreground)]"
               >
@@ -79,6 +82,18 @@ export function LanguageSwitcher({ locale, visibleLocales = locales }: Props) {
           })}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+export function LanguageSwitcherFallback({ locale }: Pick<Props, "locale">) {
+  return (
+    <div
+      aria-label={localeLabels[locale]}
+      className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-[var(--color-muted-foreground)]"
+    >
+      <span className="text-base leading-none">{localeFlags[locale]}</span>
+      <span className="hidden sm:inline">{localeLabels[locale]}</span>
     </div>
   );
 }

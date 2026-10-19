@@ -51,12 +51,30 @@ export function getLocaleFromHeader(
 
   const requested = headerValue
     .split(",")
-    .map((part) => part.trim().split(";")[0]?.toLowerCase())
-    .map((part) => part?.split("-")[0])
-    .find(
-      (part): part is Locale =>
-        Boolean(part) && isLocale(part) && enabledLocales.includes(part),
-    );
+    .map((part, index) => {
+      const [tag, ...parameters] = part.trim().toLowerCase().split(";");
+      const qualityParameter = parameters.find((parameter) =>
+        parameter.trim().startsWith("q="),
+      );
+      const quality = qualityParameter
+        ? Number(qualityParameter.trim().slice(2))
+        : 1;
+
+      return {
+        locale: tag?.split("-")[0],
+        quality: Number.isFinite(quality) && quality >= 0 && quality <= 1 ? quality : 0,
+        index,
+      };
+    })
+    .filter(
+      (candidate): candidate is { locale: Locale; quality: number; index: number } =>
+        Boolean(candidate.locale) &&
+        candidate.quality > 0 &&
+        isLocale(candidate.locale) &&
+        enabledLocales.includes(candidate.locale),
+    )
+    .sort((left, right) => right.quality - left.quality || left.index - right.index)
+    .at(0)?.locale;
 
   return requested ?? resolvedFallback;
 }

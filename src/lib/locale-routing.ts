@@ -5,9 +5,8 @@ import {
   defaultLocale,
   isLocale,
   type Locale,
-  withLocale,
 } from "@/lib/i18n";
-import { getFreshSiteSettings } from "@/lib/strapi";
+import { getFreshSiteSettings, getSiteSettings } from "@/lib/strapi";
 
 function normalizeEnabledLocales(locales: readonly Locale[] | undefined) {
   const normalized = (locales ?? []).filter(
@@ -20,11 +19,19 @@ function normalizeEnabledLocales(locales: readonly Locale[] | undefined) {
 
 export const getEnabledLocales = cache(async () => {
   const settings =
+    (await getSiteSettings(defaultLocale)) ??
+    (await getSiteSettings(browserLanguageFallbackLocale));
+
+  return normalizeEnabledLocales(settings?.languageSwitcherLocales);
+});
+
+export async function getFreshEnabledLocales() {
+  const settings =
     (await getFreshSiteSettings(defaultLocale)) ??
     (await getFreshSiteSettings(browserLanguageFallbackLocale));
 
   return normalizeEnabledLocales(settings?.languageSwitcherLocales);
-});
+}
 
 export function getPreferredLocale(enabledLocales: readonly Locale[]) {
   return (
@@ -32,18 +39,6 @@ export function getPreferredLocale(enabledLocales: readonly Locale[]) {
     enabledLocales[0] ??
     browserLanguageFallbackLocale
   );
-}
-
-export function replaceLocaleInPath(pathname: string, fromLocale: Locale, toLocale: Locale) {
-  if (pathname === `/${fromLocale}`) {
-    return withLocale(toLocale);
-  }
-
-  if (pathname.startsWith(`/${fromLocale}/`)) {
-    return pathname.replace(`/${fromLocale}/`, `/${toLocale}/`);
-  }
-
-  return withLocale(toLocale);
 }
 
 export async function getEnabledLocaleStaticParams() {
