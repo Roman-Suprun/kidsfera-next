@@ -39,6 +39,22 @@ Notes:
 - `STRAPI_PING_INTERVAL_MS` is optional and defaults to `240000` (4 minutes).
 - This works when your Next.js app runs as a long-lived Node server. If you deploy the frontend on a serverless platform, use an external cron/uptime service instead.
 
+## ISR and Strapi publishing
+
+Public localized pages use Incremental Static Regeneration (ISR). CMS data is
+automatically refreshed at most one minute after a page is next requested.
+
+For an immediate refresh after publishing in Strapi:
+
+1. Generate a long random value and set it as `REVALIDATE_SECRET` in the Next.js deployment environment.
+2. In Strapi Admin, create a webhook for `entry.create`, `entry.update`, `entry.publish`, `entry.unpublish`, and `entry.delete`.
+3. Set its URL to `https://kidsfera.com/api/revalidate` and method to `POST`.
+4. Add the request header `x-revalidate-secret` with the same secret value.
+
+The endpoint invalidates all localized page routes and `sitemap.xml`. The next
+visit rebuilds only the affected cached output, so publishing does not require a
+new frontend deployment.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
@@ -53,4 +69,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-

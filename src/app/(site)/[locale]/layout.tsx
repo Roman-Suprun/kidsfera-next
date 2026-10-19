@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Inter, Unbounded } from "next/font/google";
 import Script from "next/script";
 
 import { browserLanguageFallbackLocale, isLocale } from "@/lib/i18n";
 import { getSiteOrigin, isPreviewDeployment } from "@/lib/strapi";
 
-import "./globals.css";
+import "../../globals.css";
 
 const bodyFont = Inter({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
@@ -34,15 +33,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+// Locale comes from the URL, so this document shell can remain statically
+// rendered and participate in ISR. Request headers are intentionally not read
+// here; browser-language detection belongs exclusively to the `/` redirect.
+export const revalidate = 60;
+export const dynamicParams = true;
+
+export default async function LocaleDocumentLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
-  const headerStore = await headers();
-  const localeHeader = headerStore.get("x-kidsfera-locale");
-  const htmlLang =
-    localeHeader && isLocale(localeHeader) ? localeHeader : browserLanguageFallbackLocale;
+  const { locale } = await params;
+  const htmlLang = isLocale(locale) ? locale : browserLanguageFallbackLocale;
 
   return (
     <html

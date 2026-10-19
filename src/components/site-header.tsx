@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -11,7 +11,10 @@ import {
   PhoneIcon,
   XIcon,
 } from "@/components/icons";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import {
+  LanguageSwitcher,
+  LanguageSwitcherFallback,
+} from "@/components/language-switcher";
 import { SocialLinkIcon } from "@/components/social-link-icon";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
@@ -191,7 +194,9 @@ export function SiteHeader({ locale, settings }: Props) {
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2 md:flex">
-            <LanguageSwitcher locale={locale} visibleLocales={settings.languageSwitcherLocales} />
+            <Suspense fallback={<LanguageSwitcherFallback locale={locale} />}>
+              <LanguageSwitcher locale={locale} visibleLocales={settings.languageSwitcherLocales} />
+            </Suspense>
             <Link
               href={`${homeHref}#contact`}
               className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e03d00]"
@@ -201,7 +206,9 @@ export function SiteHeader({ locale, settings }: Props) {
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <LanguageSwitcher locale={locale} visibleLocales={settings.languageSwitcherLocales} />
+            <Suspense fallback={<LanguageSwitcherFallback locale={locale} />}>
+              <LanguageSwitcher locale={locale} visibleLocales={settings.languageSwitcherLocales} />
+            </Suspense>
             <div className="relative">
               <button
                 type="button"

@@ -4,9 +4,10 @@ import {
 } from "@/lib/sitemap";
 import { getSiteOrigin, isPreviewDeployment } from "@/lib/strapi";
 
-// The list is sourced from the CMS at request time, while the response is
-// cached at the CDN using the explicit Cache-Control header below.
-export const dynamic = "force-dynamic";
+// Keep the sitemap in the same ISR model as public pages. A Strapi webhook
+// invalidates this route immediately; otherwise it refreshes at most every
+// minute when requested.
+export const revalidate = 60;
 
 export async function GET() {
   const origin = getSiteOrigin();
@@ -16,7 +17,7 @@ export async function GET() {
   return new Response(body, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=300",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
       ...(isPreviewDeployment() ? { "X-Robots-Tag": "noindex, nofollow" } : {}),
     },
   });

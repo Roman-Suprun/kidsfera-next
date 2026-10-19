@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
-import { defaultLocale, type Locale, withLocale } from "@/lib/i18n";
+import { type Locale, withLocale } from "@/lib/i18n";
+import { getEnabledLocales, getPreferredLocale } from "@/lib/locale-routing";
 import {
   getBlogPosts,
   getProducts,
   getProjects,
-  getSiteSettings,
 } from "@/lib/strapi";
 
 type SitemapChangeFrequency = MetadataRoute.Sitemap[number]["changeFrequency"];
@@ -118,13 +118,6 @@ function toSitemapEntries(
   }));
 }
 
-async function getEnabledLocales(): Promise<Locale[]> {
-  const settings = await getSiteSettings(defaultLocale);
-  const enabledLocales = settings?.languageSwitcherLocales ?? [defaultLocale];
-
-  return enabledLocales.length ? [...enabledLocales] : [defaultLocale];
-}
-
 async function getDynamicEntriesForLocale(locale: Locale): Promise<SitemapEntrySeed[]> {
   const [products, projects, blogPosts] = await Promise.all([
     getProducts(locale),
@@ -163,20 +156,26 @@ export async function getSitemapEntries(origin: string): Promise<SitemapEntry[]>
 
   return [...groupedEntries.values()]
     .flatMap((siblings) =>
-      siblings.map((entry) => ({
-        url: buildAbsoluteUrl(origin, entry.path),
-        lastModified: entry.lastModified ? new Date(entry.lastModified) : undefined,
-        changeFrequency: entry.changeFrequency,
-        priority: entry.priority,
-        alternates: {
-          languages: {
-            ...Object.fromEntries(
-              siblings.map((sibling) => [sibling.locale, buildAbsoluteUrl(origin, sibling.path)]),
-            ),
-            "x-default": buildAbsoluteUrl(origin, siblings[0].path),
+      siblings.map((entry) => {
+        const fallbackSibling =
+          siblings.find((sibling) => sibling.locale === getPreferredLocale(enabledLocales)) ??
+          siblings[0];
+
+        return {
+          url: buildAbsoluteUrl(origin, entry.path),
+          lastModified: entry.lastModified ? new Date(entry.lastModified) : undefined,
+          changeFrequency: entry.changeFrequency,
+          priority: entry.priority,
+          alternates: {
+            languages: {
+              ...Object.fromEntries(
+                siblings.map((sibling) => [sibling.locale, buildAbsoluteUrl(origin, sibling.path)]),
+              ),
+              "x-default": buildAbsoluteUrl(origin, fallbackSibling.path),
+            },
           },
-        },
-      })),
+        };
+      }),
     )
     .sort((left, right) => left.url.localeCompare(right.url));
 }
@@ -225,13 +224,10 @@ export function renderSitemapXml(entries: SitemapEntry[]) {
 }
 
 export function renderRobotsTxt(origin: string) {
-  const host = new URL(origin).host;
-
   return [
     "User-agent: *",
     "Allow: /",
     "",
     `Sitemap: ${origin}/sitemap.xml`,
-    `Host: ${host}`,
   ].join("\n");
 }

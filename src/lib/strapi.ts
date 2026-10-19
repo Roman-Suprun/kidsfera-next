@@ -1237,7 +1237,9 @@ async function fetchSiteSettings(locale: Locale, options?: StrapiFetchOptions) {
   };
 }
 
-export const getSiteSettings = cache(async (locale: Locale) => fetchSiteSettings(locale, { cache: "no-store" }));
+// Settings are shared by every public page, so they must participate in the
+// same ISR cache as the rest of the CMS content.
+export const getSiteSettings = cache(async (locale: Locale) => fetchSiteSettings(locale));
 
 export async function getFreshSiteSettings(locale: Locale) {
   return fetchSiteSettings(locale, { cache: "no-store" });
@@ -1374,17 +1376,16 @@ export const getProjectsPage = cache(async (locale: Locale) => {
   return mapProjectsPage(normalizeSingle<RawProjectsPage>(payload));
 });
 
-export async function getProductPageLabels(locale: Locale) {
+export const getProductPageLabels = cache(async (locale: Locale) => {
   const query = baseQuery(locale);
 
   const payload = await strapiFetch<StrapiEnvelope<ProductPageLabels | null>>(
     "/api/product-page",
     query,
-    { cache: "no-store" },
   );
 
   return normalizeSingle<ProductPageLabels>(payload);
-}
+});
 
 export const getCategories = cache(async (locale: Locale) => {
   const query = sortCollection(baseQuery(locale));
@@ -1505,9 +1506,7 @@ const getFeedbackByTarget = cache(async (targetType: FeedbackTargetType, documen
   query.append("sort[0]", "publishedAt:desc");
   query.append("sort[1]", "createdAt:desc");
 
-  const payload = await strapiFetch<StrapiEnvelope<RawFeedback[]>>("/api/feedbacks", query, {
-    cache: "no-store",
-  });
+  const payload = await strapiFetch<StrapiEnvelope<RawFeedback[]>>("/api/feedbacks", query);
 
   return normalizeCollection<RawFeedback>(payload)
     .map((entry) => mapFeedback(entry))
