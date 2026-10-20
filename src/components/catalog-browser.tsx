@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { StrapiImage } from "@/components/strapi-image";
 import {
   ArrowRightIcon,
   ChevronDownIcon,
@@ -189,12 +189,12 @@ export function CatalogBrowser({
               >
                 <div className="relative aspect-[4/3] bg-[var(--color-panel)]">
                   {product.gallery[0] ? (
-                    <Image
+                    <StrapiImage
                       alt={product.gallery[0].alt}
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       fill
+                      image={product.gallery[0]}
                       sizes="(min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw"
-                      src={product.gallery[0].url}
                     />
                   ) : null}
                   {product.categories.length ? (

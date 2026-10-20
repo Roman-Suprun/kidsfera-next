@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 
 import { ProjectsBrowser } from "@/components/projects-browser";
+import { StrapiImage } from "@/components/strapi-image";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.subtitle,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, "/projects"),
-    imageUrl: projects[0]?.imageUrl,
+    imageUrl: projects[0]?.imageUrl?.url,
   });
 }
 
@@ -61,13 +61,13 @@ export default async function ProjectsPage({ params }: PageProps) {
     <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative h-72 overflow-hidden bg-[var(--color-surface-strong)] md:h-96">
         {heroImage ? (
-          <Image
+          <StrapiImage
             alt={page.eyebrow}
             className="object-cover opacity-40"
             fill
+            image={heroImage}
             priority
             sizes="100vw"
-            src={heroImage}
           />
         ) : null}
         <div className="absolute inset-0 flex w-full flex-col justify-end px-8 pb-12 md:px-16">

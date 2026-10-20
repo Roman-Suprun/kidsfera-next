@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -12,6 +11,7 @@ import {
 import { ProjectHeroGallery } from "@/components/project-hero-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
+import { StrapiImage } from "@/components/strapi-image";
 import { buildBreadcrumbSchema, StructuredData } from "@/components/structured-data";
 import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: project.description || project.subtitle,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, `/projects/${slug}`),
-    imageUrl: project.gallery[0]?.url || project.imageUrl,
+    imageUrl: project.gallery[0]?.url || project.imageUrl?.url,
   });
 }
 
@@ -114,8 +114,8 @@ export default async function ProjectPage({ params }: PageProps) {
       : project.imageUrl
         ? [
             {
-              url: project.imageUrl,
-              alt: project.title,
+              ...project.imageUrl,
+              alt: project.imageUrl.alt || project.title,
             },
           ]
         : [];
@@ -237,11 +237,11 @@ export default async function ProjectPage({ params }: PageProps) {
                     >
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--color-panel)]">
                         {product.gallery[0] ? (
-                          <Image
+                          <StrapiImage
                             alt={product.gallery[0].alt}
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                             height={64}
-                            src={product.gallery[0].url}
+                            image={product.gallery[0]}
                             width={64}
                           />
                         ) : null}
@@ -344,12 +344,12 @@ export default async function ProjectPage({ params }: PageProps) {
                   >
                     <div className="relative aspect-video bg-[var(--color-panel)]">
                       {relatedProject.imageUrl ? (
-                        <Image
+                        <StrapiImage
                           alt={relatedProject.title}
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                           fill
+                          image={relatedProject.imageUrl}
                           sizes="(min-width: 768px) 33vw, 100vw"
-                          src={relatedProject.imageUrl}
                         />
                       ) : null}
                     </div>

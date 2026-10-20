@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 import { ArrowRightIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import { type Locale, withLocale } from "@/lib/i18n";
 import type { BlogCategory, BlogPage, BlogPost } from "@/lib/strapi";
 
@@ -111,13 +111,13 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
           >
             <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-panel)] md:aspect-auto">
               {featuredPost.coverImage ? (
-                <Image
+                <StrapiImage
                   alt={featuredPost.coverImage.alt}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   fill
+                  image={featuredPost.coverImage}
                   priority
                   sizes="(min-width: 768px) 50vw, 100vw"
-                  src={featuredPost.coverImage.url}
                 />
               ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
@@ -186,12 +186,12 @@ export function BlogsBrowser({ locale, page, categories, posts }: Props) {
                 >
                   <div className="relative aspect-[16/9] shrink-0 overflow-hidden bg-[var(--color-panel)]">
                     {post.coverImage ? (
-                      <Image
+                      <StrapiImage
                         alt={post.coverImage.alt}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         fill
+                        image={post.coverImage}
                         sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                        src={post.coverImage.url}
                       />
                     ) : null}
                     {category ? (

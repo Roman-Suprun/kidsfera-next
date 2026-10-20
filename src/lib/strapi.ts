@@ -32,6 +32,17 @@ type StrapiMedia = {
   name?: string | null;
   hash?: string | null;
   updatedAt?: string | null;
+  width?: number | null;
+  height?: number | null;
+  formats?: Record<string, StrapiMediaFormat | null> | null;
+};
+
+type StrapiMediaFormat = {
+  url?: string | null;
+  hash?: string | null;
+  updatedAt?: string | null;
+  width?: number | null;
+  height?: number | null;
 };
 
 export type StatItem = {
@@ -48,6 +59,15 @@ export type FeatureItem = {
 export type MediaImage = {
   url: string;
   alt: string;
+  width?: number;
+  height?: number;
+  variants: MediaVariant[];
+};
+
+export type MediaVariant = {
+  url: string;
+  width: number;
+  height: number;
 };
 
 export type AboutValue = {
@@ -116,10 +136,7 @@ export type Badge = {
   label: string;
 };
 
-export type ImageLink = {
-  url: string;
-  alt: string;
-};
+export type ImageLink = MediaImage;
 
 export type ProjectTestimonial = {
   quote: string;
@@ -191,7 +208,7 @@ export type HomePage = {
   heroSecondaryCtaHref: string;
   heroQuote?: string | null;
   heroQuoteAttribution?: string | null;
-  heroImageUrl: string;
+  heroImageUrl: MediaImage | null;
   stats: StatItem[];
   productsSectionEyebrow: string;
   productsSectionTitle: string;
@@ -420,7 +437,7 @@ export type Category = {
   slug: string;
   description: string;
   cardDescription: string;
-  imageUrl: string;
+  imageUrl: MediaImage | null;
   themeColor: string;
   emoji?: string | null;
   sortOrder?: number | null;
@@ -481,7 +498,7 @@ export type Project = {
   yearLabel: string;
   themeColor?: string | null;
   countryFlag?: string | null;
-  imageUrl: string;
+  imageUrl: MediaImage | null;
   gallery: ImageLink[];
   testimonial?: ProjectTestimonial | null;
   usedProducts: Product[];
@@ -561,7 +578,8 @@ type RawCategory = Omit<Category, "imageUrl" | "seo"> & {
   seo?: RawSeo | null;
 };
 
-type RawImageLink = Omit<ImageLink, "url"> & {
+type RawImageLink = {
+  alt?: string | null;
   image?: StrapiMedia | null;
 };
 
@@ -800,7 +818,7 @@ function mapCategory(value: unknown): Category | null {
 
   return {
     ...category,
-    imageUrl: resolveMediaUrl(category.image) ?? "",
+    imageUrl: mapMediaImage(category.image, category.name),
     seo: mapSeo(category.seo),
   };
 }
@@ -884,6 +902,38 @@ function resolveMediaAlt(value: unknown) {
   return media.alternativeText ?? media.name ?? null;
 }
 
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+function resolveMediaVariants(media: StrapiMedia): MediaVariant[] {
+  const parentVersion = media.hash ?? media.updatedAt ?? media.id ?? null;
+  const variants = Object.values(media.formats ?? []).flatMap((format) => {
+    if (
+      !format ||
+      typeof format.url !== "string" ||
+      !format.url ||
+      !isPositiveNumber(format.width) ||
+      !isPositiveNumber(format.height)
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        url: buildAssetUrl(
+          format.url,
+          format.hash ?? format.updatedAt ?? parentVersion,
+        ),
+        width: format.width,
+        height: format.height,
+      },
+    ];
+  });
+
+  return variants.sort((left, right) => left.width - right.width);
+}
+
 function mapMediaImage(value: unknown, fallbackAlt = ""): MediaImage | null {
   const url = resolveMediaUrl(value);
 
@@ -891,9 +941,14 @@ function mapMediaImage(value: unknown, fallbackAlt = ""): MediaImage | null {
     return null;
   }
 
+  const media = value as StrapiMedia;
+
   return {
     url,
     alt: resolveMediaAlt(value) ?? fallbackAlt,
+    ...(isPositiveNumber(media.width) ? { width: media.width } : {}),
+    ...(isPositiveNumber(media.height) ? { height: media.height } : {}),
+    variants: resolveMediaVariants(media),
   };
 }
 
@@ -904,16 +959,15 @@ function mapImageLink(value: unknown): ImageLink | null {
     return null;
   }
 
-  const url = resolveMediaUrl(image.image);
+  const mediaImage = mapMediaImage(image.image, image.alt ?? "");
 
-  if (!url) {
+  if (!mediaImage) {
     return null;
   }
 
   return {
-    ...image,
-    url,
-    alt: image.alt ?? resolveMediaAlt(image.image) ?? "",
+    ...mediaImage,
+    alt: image.alt ?? mediaImage.alt,
   };
 }
 
@@ -941,7 +995,7 @@ function mapHomePage(value: unknown): HomePage | null {
   return {
     ...page,
     seo: mapSeo(page.seo),
-    heroImageUrl: resolveMediaUrl(page.heroImage) ?? "",
+    heroImageUrl: mapMediaImage(page.heroImage, page.heroTitleLine1),
     featuredProducts: Array.isArray(page.featuredProducts)
       ? page.featuredProducts
           .map((entry) => mapFeaturedProduct(entry))
@@ -963,7 +1017,7 @@ function mapProject(value: unknown): Project | null {
     ...project,
     categories,
     projectType: categories.map((category) => category.name).join(", "),
-    imageUrl: resolveMediaUrl(project.image) ?? "",
+    imageUrl: mapMediaImage(project.image, project.title),
     gallery: (project.gallery ?? [])
       .map((entry) => mapImageLink(entry))
       .filter((entry): entry is ImageLink => Boolean(entry)),
