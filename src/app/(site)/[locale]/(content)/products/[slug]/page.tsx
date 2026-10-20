@@ -215,29 +215,39 @@ export default async function ProductPage({ params }: PageProps) {
       { name: product.name, path: productPath },
     ]),
   ];
+  const productSchema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "@id": new URL(productPath, `${origin}/`).toString(),
+    name: product.name,
+    description: product.shortDescription || product.description,
+    url: new URL(productPath, `${origin}/`).toString(),
+    ...(product.gallery.length
+      ? {
+          image: product.gallery.map((image) =>
+            new URL(image.url, `${origin}/`).toString(),
+          ),
+        }
+      : {}),
+    ...(product.categories.length
+      ? { category: product.categories.map((category) => category.name).join(", ") }
+      : {}),
+    ...(settings.siteName
+      ? { brand: { "@type": "Brand", name: settings.siteName } }
+      : {}),
+  };
 
   if (summary.averageRating !== null && summary.totalCount > 0) {
-    structuredData.push({
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: product.name,
-      description: product.shortDescription || product.description,
-      sku: product.slug,
-      url: new URL(productPath, `${origin}/`).toString(),
-      ...(product.gallery.length ? { image: product.gallery.map((image) => image.url) } : {}),
-      ...(product.categories.length
-        ? { category: product.categories.map((category) => category.name).join(", ") }
-        : {}),
-      brand: { "@id": `${origin}/#organization` },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: summary.averageRating,
-        reviewCount: summary.totalCount,
-        bestRating: 5,
-        worstRating: 1,
-      },
-    });
+    productSchema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: summary.averageRating,
+      reviewCount: summary.totalCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
   }
+
+  structuredData.push(productSchema);
 
   return (
     <>
