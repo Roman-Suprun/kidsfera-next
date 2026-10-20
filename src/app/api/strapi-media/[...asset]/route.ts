@@ -4,6 +4,7 @@ const STRAPI_URL =
   process.env.STRAPI_URL ??
   process.env.NEXT_PUBLIC_STRAPI_URL ??
   "http://localhost:1337";
+const MEDIA_CACHE_SECONDS = 2_678_400;
 
 type RouteContext = {
   params: Promise<{
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       Accept: request.headers.get("accept") ?? "*/*",
     },
     cache: "force-cache",
-    next: { revalidate: 3600 },
+    next: { revalidate: MEDIA_CACHE_SECONDS },
   });
 
   if (!response.ok) {
@@ -38,13 +39,17 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   const headers = new Headers();
   const contentType = response.headers.get("content-type");
-  const cacheControl = response.headers.get("cache-control");
 
   if (contentType) {
     headers.set("content-type", contentType);
   }
 
-  headers.set("cache-control", cacheControl ?? "public, max-age=3600, s-maxage=3600");
+  // Media URLs include a Strapi content hash. A replacement therefore gets a
+  // new URL, making a long immutable CDN cache safe and inexpensive.
+  headers.set(
+    "cache-control",
+    `public, max-age=${MEDIA_CACHE_SECONDS}, s-maxage=${MEDIA_CACHE_SECONDS}, immutable`,
+  );
 
   return new NextResponse(response.body, {
     status: response.status,

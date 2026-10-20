@@ -10,26 +10,11 @@ const nextConfig: NextConfig = {
     // stylesheet request for visitors without a warm cache.
     inlineCss: true,
   },
-  images: {
-    unoptimized: true,
-    localPatterns: [
-      {
-        pathname: "/api/strapi-media/**",
-      },
-    ],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "kidsfera-strapi-media.s3.eu-west-1.amazonaws.com",
-        pathname: "/**",
-      },
-    ],
-    minimumCacheTTL: 14400,
-  },
   outputFileTracingRoot: projectRoot,
   turbopack: {
     root: projectRoot,
   },
 };
+
 
 export default nextConfig;

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FeaturedProductsTabs } from "@/components/featured-products-tabs";
+import { StrapiImage } from "@/components/strapi-image";
 import {
   ArrowRightIcon,
   GlobeIcon,
@@ -165,7 +165,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.heroDescription,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale),
-    imageUrl: page.heroImageUrl,
+    imageUrl: page.heroImageUrl?.url,
   });
 }
 
@@ -276,14 +276,16 @@ export default async function HomePage({ params }: PageProps) {
         </div>
 
         <div className="relative h-[60vw] overflow-hidden bg-[var(--color-panel)] md:h-[calc(100svh-var(--site-header-height))]">
-          <Image
-            alt={page.heroQuoteAttribution ?? page.heroTitleLine1}
-            className="object-cover"
-            fill
-            priority
-            sizes="100vw"
-            src={page.heroImageUrl}
-          />
+          {page.heroImageUrl ? (
+            <StrapiImage
+              alt={page.heroQuoteAttribution ?? page.heroTitleLine1}
+              className="object-cover"
+              fill
+              image={page.heroImageUrl}
+              priority
+              sizes="100vw"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
           {page.heroQuote ? (
             <div className="absolute bottom-8 left-8 right-8">
@@ -348,12 +350,12 @@ export default async function HomePage({ params }: PageProps) {
             >
               <div className="relative aspect-[4/3]">
                 {category.imageUrl ? (
-                  <Image
+                  <StrapiImage
                     alt={category.name}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     fill
+                    image={category.imageUrl}
                     sizes="(min-width: 768px) 33vw, 50vw"
-                    src={category.imageUrl}
                   />
                 ) : null}
               </div>
@@ -479,12 +481,12 @@ export default async function HomePage({ params }: PageProps) {
                 href={withLocale(typedLocale, `/projects/${project.slug}`)}
               >
                 {project.imageUrl ? (
-                  <Image
+                  <StrapiImage
                     alt={project.title}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     fill
+                    image={project.imageUrl}
                     sizes={index === 0 ? "(min-width: 768px) 50vw, 50vw" : "(min-width: 768px) 25vw, 50vw"}
-                    src={project.imageUrl}
                   />
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

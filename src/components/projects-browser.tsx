@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRightIcon, MapPinIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
 import { inferProjectThemeColor } from "@/lib/project-presentation";
@@ -95,12 +95,12 @@ export function ProjectsBrowser({ locale, projects, page }: Props) {
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-panel)]">
                 {project.imageUrl ? (
-                  <Image
+                  <StrapiImage
                     alt={project.title}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     fill
+                    image={project.imageUrl}
                     sizes="(min-width: 1280px) 26vw, (min-width: 768px) 50vw, 100vw"
-                    src={project.imageUrl}
                   />
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />

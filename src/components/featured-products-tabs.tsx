@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRightIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
 import type { FeaturedProduct } from "@/lib/strapi";
@@ -109,12 +109,12 @@ export function FeaturedProductsTabs({ locale, eyebrow, title, items }: Props) {
 
           <div className="relative min-h-[18rem] bg-[var(--color-panel)] md:min-h-[29rem]">
             {activeImage ? (
-              <Image
+              <StrapiImage
                 alt={activeImage.alt}
                 className="object-cover"
                 fill
+                image={activeImage}
                 sizes="(min-width: 768px) 50vw, 100vw"
-                src={activeImage.url}
               />
             ) : null}
           </div>

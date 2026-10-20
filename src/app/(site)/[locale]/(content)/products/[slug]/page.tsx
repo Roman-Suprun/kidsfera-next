@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 
 import {
   ArrowRightIcon,
@@ -13,6 +12,7 @@ import { FeedbackSection } from "@/components/feedback-section";
 import { ProductGallery } from "@/components/product-gallery";
 import { QuoteRequestLink } from "@/components/quote-request-link";
 import { StrapiRichText } from "@/components/strapi-rich-text";
+import { StrapiImage } from "@/components/strapi-image";
 import { buildBreadcrumbSchema, StructuredData } from "@/components/structured-data";
 import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
@@ -411,12 +411,12 @@ export default async function ProductPage({ params }: PageProps) {
                 >
                   <div className="relative aspect-video bg-[var(--color-panel)]">
                     {item.gallery[0] ? (
-                      <Image
+                      <StrapiImage
                         alt={item.gallery[0].alt}
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         fill
+                        image={item.gallery[0]}
                         sizes="(min-width: 768px) 33vw, 100vw"
-                        src={item.gallery[0].url}
                       />
                     ) : null}
                   </div>

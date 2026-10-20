@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import type { ImageLink } from "@/lib/strapi";
 
 type Props = {
@@ -102,12 +102,12 @@ export function ProductGallery({ images, productName }: Props) {
     <div>
       <div className="relative overflow-hidden rounded-[2rem] bg-[var(--color-panel)]">
         <div className="relative aspect-[4/3]">
-          <Image
+          <StrapiImage
             alt={activeImage.alt || productName}
             className="object-cover"
             fill
+            image={activeImage}
             sizes="(min-width: 1024px) 50vw, 100vw"
-            src={activeImage.url}
           />
           <button
             aria-label={`Open preview for ${activeImage.alt || productName}`}
@@ -168,12 +168,12 @@ export function ProductGallery({ images, productName }: Props) {
             >
               <span className="sr-only">{image.alt}</span>
               <span className="relative block aspect-square">
-                <Image
+                <StrapiImage
                   alt=""
                   className="object-cover"
                   fill
+                  image={image}
                   sizes="(min-width: 1024px) 8rem, 25vw"
-                  src={image.url}
                 />
               </span>
             </button>
@@ -229,13 +229,13 @@ export function ProductGallery({ images, productName }: Props) {
             onTouchEnd={handlePreviewTouchEnd}
             onTouchStart={handlePreviewTouchStart}
           >
-            <Image
+            <StrapiImage
               alt={activeImage.alt || productName}
               className="object-contain"
               fill
+              image={activeImage}
               priority
               sizes="100vw"
-              src={activeImage.url}
             />
           </div>
 

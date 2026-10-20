@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { CalendarIcon, ChevronLeftIcon, ClockIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import { buildBreadcrumbSchema, StructuredData } from "@/components/structured-data";
 import { getLocalizedStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
@@ -121,13 +121,13 @@ export default async function BlogPostPage({ params }: PageProps) {
       <section className="page-offset min-h-screen bg-[var(--color-background)]">
       <div className="relative h-[50vh] overflow-hidden bg-[var(--color-surface-strong)]">
         {post.coverImage ? (
-          <Image
+          <StrapiImage
             alt={post.coverImage.alt}
             className="h-full w-full object-cover opacity-80"
             fill
+            image={post.coverImage}
             priority
             sizes="100vw"
-            src={post.coverImage.url}
           />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -243,12 +243,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                 >
                   <div className="relative aspect-video overflow-hidden bg-[var(--color-panel)]">
                     {relatedPost.coverImage ? (
-                      <Image
+                      <StrapiImage
                         alt={relatedPost.coverImage.alt}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         fill
+                        image={relatedPost.coverImage}
                         sizes="(min-width: 640px) 33vw, 100vw"
-                        src={relatedPost.coverImage.url}
                       />
                     ) : null}
                   </div>

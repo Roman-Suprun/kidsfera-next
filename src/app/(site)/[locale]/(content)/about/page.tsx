@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { ArrowRightIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { getBaseSiteUrl, getAboutPage } from "@/lib/strapi";
@@ -87,13 +87,13 @@ export default async function AboutPage({ params }: PageProps) {
     <div className="page-offset min-h-screen bg-[var(--color-background)]">
       <section className="relative flex min-h-[70vh] items-end overflow-hidden bg-[var(--color-surface-strong)]">
         {page.heroImage ? (
-          <Image
+          <StrapiImage
             alt={page.heroImage.alt}
             className="absolute inset-0 h-full w-full object-cover opacity-30"
             fill
+            image={page.heroImage}
             priority
             sizes="100vw"
-            src={page.heroImage.url}
           />
         ) : null}
         <div className="relative mx-auto w-full max-w-7xl px-8 pb-20 md:px-16">
@@ -191,12 +191,12 @@ export default async function AboutPage({ params }: PageProps) {
         <div className="mx-auto grid max-w-7xl gap-16 px-6 md:grid-cols-2 md:items-center">
           <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-[var(--color-panel)]">
             {page.factoryImage ? (
-              <Image
+              <StrapiImage
                 alt={page.factoryImage.alt}
                 className="h-full w-full object-cover"
                 fill
+                image={page.factoryImage}
                 sizes="(min-width: 768px) 50vw, 100vw"
-                src={page.factoryImage.url}
               />
             ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
@@ -253,12 +253,12 @@ export default async function AboutPage({ params }: PageProps) {
                 >
                   <div className="relative aspect-square overflow-hidden bg-white/5">
                     {member.avatar ? (
-                      <Image
+                      <StrapiImage
                         alt={member.avatar.alt}
                         className="h-full w-full object-cover opacity-80"
                         fill
+                        image={member.avatar}
                         sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, 50vw"
-                        src={member.avatar.url}
                       />
                     ) : null}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 
 import { ArrowRightIcon, ChevronRightIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import { getEnabledLocaleStaticParams } from "@/lib/locale-routing";
 import { buildMetadata } from "@/lib/metadata";
 import { defaultItemsLabelByLocale, isLocale, type Locale, withLocale } from "@/lib/i18n";
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: page.description,
     baseUrl: getBaseSiteUrl(),
     canonicalPath: withLocale(locale, "/categories"),
-    imageUrl: categories[0]?.imageUrl,
+    imageUrl: categories[0]?.imageUrl?.url,
   });
 }
 
@@ -123,12 +123,12 @@ export default async function CategoriesPage({ params }: PageProps) {
                 href={withLocale(typedLocale, `/catalog?category=${category.slug}`)}
               >
                 {category.imageUrl ? (
-                  <Image
+                  <StrapiImage
                     alt={category.name}
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     fill
+                    image={category.imageUrl}
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    src={category.imageUrl}
                   />
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+import { StrapiImage } from "@/components/strapi-image";
 import type { ImageLink } from "@/lib/strapi";
 
 type Props = {
@@ -27,13 +27,13 @@ export function ProjectHeroGallery({ images, title }: Props) {
 
   return (
     <div className="relative h-[55vh] overflow-hidden bg-[var(--color-surface-strong)]">
-      <Image
+      <StrapiImage
         alt={activeImage.alt || title}
         className="object-cover opacity-90"
         fill
+        image={activeImage}
         priority
         sizes="100vw"
-        src={activeImage.url}
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.18)_0%,rgba(0,0,0,0.28)_55%,rgba(0,0,0,0.5)_100%)]" />
 
@@ -74,12 +74,12 @@ export function ProjectHeroGallery({ images, title }: Props) {
                   onClick={() => setActiveIndex(index)}
                   type="button"
                 >
-                  <Image
+                  <StrapiImage
                     alt={image.alt || title}
                     className="object-cover"
                     fill
+                    image={image}
                     sizes="(min-width: 640px) 109px, 104px"
-                    src={image.url}
                   />
                   <span
                     className={`absolute inset-0 transition-colors duration-200 ${
