@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     inlineCss: true,
   },
   images: {
+    unoptimized: true,
     localPatterns: [
       {
         pathname: "/api/strapi-media/**",
