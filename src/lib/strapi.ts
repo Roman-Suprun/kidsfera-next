@@ -34,6 +34,8 @@ type StrapiMedia = {
   updatedAt?: string | null;
   width?: number | null;
   height?: number | null;
+  size?: number | null;
+  sizeInBytes?: number | null;
   formats?: Record<string, StrapiMediaFormat | null> | null;
 };
 
@@ -43,6 +45,8 @@ type StrapiMediaFormat = {
   updatedAt?: string | null;
   width?: number | null;
   height?: number | null;
+  size?: number | null;
+  sizeInBytes?: number | null;
 };
 
 export type StatItem = {
@@ -61,6 +65,7 @@ export type MediaImage = {
   alt: string;
   width?: number;
   height?: number;
+  bytes?: number;
   variants: MediaVariant[];
 };
 
@@ -68,6 +73,7 @@ export type MediaVariant = {
   url: string;
   width: number;
   height: number;
+  bytes?: number;
 };
 
 export type AboutValue = {
@@ -906,8 +912,17 @@ function isPositiveNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
 }
 
+function resolveMediaBytes(media: Pick<StrapiMedia, "size" | "sizeInBytes">) {
+  if (isPositiveNumber(media.sizeInBytes)) {
+    return Math.round(media.sizeInBytes);
+  }
+
+  return isPositiveNumber(media.size) ? Math.round(media.size * 1024) : undefined;
+}
+
 function resolveMediaVariants(media: StrapiMedia): MediaVariant[] {
   const parentVersion = media.hash ?? media.updatedAt ?? media.id ?? null;
+  const originalBytes = resolveMediaBytes(media);
   const variants = Object.values(media.formats ?? []).flatMap((format) => {
     if (
       !format ||
@@ -919,6 +934,15 @@ function resolveMediaVariants(media: StrapiMedia): MediaVariant[] {
       return [];
     }
 
+    const bytes = resolveMediaBytes(format);
+
+    // Strapi's default PNG resize can occasionally be larger than the source
+    // file. Never send that regression to a visitor; the original is retained
+    // as a safer candidate below.
+    if (originalBytes && bytes && bytes >= originalBytes) {
+      return [];
+    }
+
     return [
       {
         url: buildAssetUrl(
@@ -927,6 +951,7 @@ function resolveMediaVariants(media: StrapiMedia): MediaVariant[] {
         ),
         width: format.width,
         height: format.height,
+        ...(bytes ? { bytes } : {}),
       },
     ];
   });
@@ -942,12 +967,14 @@ function mapMediaImage(value: unknown, fallbackAlt = ""): MediaImage | null {
   }
 
   const media = value as StrapiMedia;
+  const bytes = resolveMediaBytes(media);
 
   return {
     url,
     alt: resolveMediaAlt(value) ?? fallbackAlt,
     ...(isPositiveNumber(media.width) ? { width: media.width } : {}),
     ...(isPositiveNumber(media.height) ? { height: media.height } : {}),
+    ...(bytes ? { bytes } : {}),
     variants: resolveMediaVariants(media),
   };
 }
