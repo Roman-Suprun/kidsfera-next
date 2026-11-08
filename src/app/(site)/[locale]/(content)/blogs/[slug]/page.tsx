@@ -34,6 +34,53 @@ function formatBlogDate(locale: Locale, isoDate: string) {
   }).format(new Date(isoDate));
 }
 
+type ArticleTextBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "list"; items: string[] };
+
+function parseArticleText(text: string): ArticleTextBlock[] {
+  const blocks: ArticleTextBlock[] = [];
+  let paragraphLines: string[] = [];
+  let listItems: string[] = [];
+
+  const addParagraph = () => {
+    const paragraph = paragraphLines.join("\n").trim();
+
+    if (paragraph) {
+      blocks.push({ type: "paragraph", text: paragraph });
+    }
+
+    paragraphLines = [];
+  };
+  const addList = () => {
+    if (listItems.length) {
+      blocks.push({ type: "list", items: listItems });
+    }
+
+    listItems = [];
+  };
+
+  for (const line of text.split(/\r?\n/)) {
+    const listItem = line.match(/^\s*[*•-]\s+(.+)$/);
+
+    if (listItem) {
+      addParagraph();
+      listItems.push(listItem[1]);
+    } else if (line.trim()) {
+      addList();
+      paragraphLines.push(line);
+    } else {
+      addParagraph();
+      addList();
+    }
+  }
+
+  addParagraph();
+  addList();
+
+  return blocks;
+}
+
 export async function generateStaticParams() {
   return getLocalizedStaticParams(getBlogPosts);
 }
@@ -204,9 +251,21 @@ export default async function BlogPostPage({ params }: PageProps) {
           {post.bodySections.map((section) => (
             <div key={`${post.slug}-${section.heading}`}>
               <h2 className="font-display mb-4 text-lg font-bold">{section.heading}</h2>
-              <p className="text-base leading-relaxed text-[color:rgba(20,18,16,0.8)]">
-                {section.text}
-              </p>
+              <div className="space-y-5 text-base leading-relaxed text-[color:rgba(20,18,16,0.8)]">
+                {parseArticleText(section.text).map((block, index) =>
+                  block.type === "paragraph" ? (
+                    <p key={index} className="whitespace-pre-line">
+                      {block.text}
+                    </p>
+                  ) : (
+                    <ul key={index} className="list-disc space-y-3 pl-6 marker:text-[var(--color-primary)]">
+                      {block.items.map((item, itemIndex) => (
+                        <li key={itemIndex}>{item}</li>
+                      ))}
+                    </ul>
+                  ),
+                )}
+              </div>
             </div>
           ))}
         </div>
