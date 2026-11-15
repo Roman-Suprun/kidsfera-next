@@ -773,6 +773,7 @@ function buildSiteSettingsQuery(targetLocale: Locale) {
 
 function buildProductsQuery(locale: Locale) {
   const query = sortCollection(baseQuery(locale));
+  query.set("pagination[pageSize]", "100");
   setPopulate(query, "populate[gallery][populate][0]", "image");
   setPopulate(query, "populate[seo][populate][0]", "ogImage");
   setPopulate(query, "populate[category][populate][0]", "image");
