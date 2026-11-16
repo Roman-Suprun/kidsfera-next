@@ -22,6 +22,7 @@ import {
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
+  getProductPriceLabel,
   getProductPageLabels,
   getProjectBySlug,
   getProjects,
@@ -249,7 +250,7 @@ export default async function ProjectPage({ params }: PageProps) {
                       <div>
                         <p className="font-display mb-1 text-xs font-bold">{product.name}</p>
                         <p className="text-xs text-[var(--color-muted-foreground)]">
-                          {product.priceLabel}
+                          {getProductPriceLabel(product, typedLocale)}
                         </p>
                         <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] transition-all group-hover:gap-2">
                           {productLabels.requestQuoteLabel}

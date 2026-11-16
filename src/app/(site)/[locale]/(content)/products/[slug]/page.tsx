@@ -19,11 +19,13 @@ import { buildMetadata } from "@/lib/metadata";
 import { isLocale, type Locale, withLocale } from "@/lib/i18n";
 import {
   getBaseSiteUrl,
+  getProductPriceLabel,
   getProductFeedback,
   getProductBySlug,
   getProductPageLabels,
   getProducts,
   getSiteSettings,
+  hasProductFromPrice,
 } from "@/lib/strapi";
 
 type PageProps = {
@@ -142,7 +144,7 @@ function buildQuotePrefillMessage(
     "",
     `${copy.productLabel}: ${product.name}`,
     `${copy.categoriesLabel}: ${product.categories.map((category) => category.name).join(", ") || "-"}`,
-    `${copy.priceLabel}: ${product.priceLabel}`,
+    `${copy.priceLabel}: ${getProductPriceLabel(product, locale)}`,
   ].join("\n");
 }
 
@@ -204,6 +206,7 @@ export default async function ProductPage({ params }: PageProps) {
   const primaryCategory = product.categories[0] ?? product.category ?? null;
   const productColor = primaryCategory?.themeColor ?? "var(--color-primary)";
   const ratingCopy = productRatingCopy[typedLocale];
+  const productPriceLabel = getProductPriceLabel(product, typedLocale);
   const { feedbacks, summary } = await getProductFeedback(product.documentId);
   const averageStars = summary.averageRating !== null ? Math.max(0, Math.min(5, Math.round(summary.averageRating))) : 0;
   const origin = getBaseSiteUrl();
@@ -237,7 +240,19 @@ export default async function ProductPage({ params }: PageProps) {
       : {}),
   };
 
-  if (summary.averageRating !== null && summary.totalCount > 0) {
+  const hasPriceOffer = hasProductFromPrice(product);
+  const hasAggregateRating = summary.averageRating !== null && summary.totalCount > 0;
+
+  if (hasPriceOffer) {
+    productSchema.offers = {
+      "@type": "AggregateOffer",
+      lowPrice: product.fromPrice,
+      priceCurrency: product.priceCurrency,
+      url: new URL(productPath, `${origin}/`).toString(),
+    };
+  }
+
+  if (hasAggregateRating) {
     productSchema.aggregateRating = {
       "@type": "AggregateRating",
       ratingValue: summary.averageRating,
@@ -247,7 +262,9 @@ export default async function ProductPage({ params }: PageProps) {
     };
   }
 
-  structuredData.push(productSchema);
+  if (hasPriceOffer || hasAggregateRating) {
+    structuredData.push(productSchema);
+  }
 
   return (
     <>
@@ -328,11 +345,13 @@ export default async function ProductPage({ params }: PageProps) {
 
             <div className="mb-6">
               <p className="font-display text-2xl font-bold" style={{ color: productColor }}>
-                {product.priceLabel}
+                {productPriceLabel}
               </p>
-              <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
-                {labels.priceOnRequestLabel}
-              </p>
+              {!hasPriceOffer ? (
+                <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+                  {labels.priceOnRequestLabel}
+                </p>
+              ) : null}
             </div>
 
             <StrapiRichText
@@ -432,7 +451,9 @@ export default async function ProductPage({ params }: PageProps) {
                   </div>
                   <div className="p-4">
                     <h3 className="font-display mb-1 text-xs font-bold">{item.name}</h3>
-                    <p className="text-xs font-bold text-[var(--color-primary)]">{item.priceLabel}</p>
+                    <p className="text-xs font-bold text-[var(--color-primary)]">
+                      {getProductPriceLabel(item, typedLocale)}
+                    </p>
                   </div>
                 </Link>
               ))}

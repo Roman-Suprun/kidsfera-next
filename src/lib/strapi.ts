@@ -460,6 +460,9 @@ export type Product = {
   shortDescription: string;
   description: string;
   priceLabel: string;
+  pricingMode: "legacy" | "on_request" | "from";
+  fromPrice: number | null;
+  priceCurrency: "UAH" | "EUR" | "USD" | "PLN" | null;
   size: string;
   capacity: string;
   material: string;
@@ -472,6 +475,53 @@ export type Product = {
   categories: Category[];
   category?: Category | null;
 };
+
+const productPriceCopy: Record<
+  Locale,
+  { fromLabel: string; onRequestLabel: string; numberLocale: string }
+> = {
+  en: { fromLabel: "From", onRequestLabel: "Price on request", numberLocale: "en-GB" },
+  uk: { fromLabel: "Від", onRequestLabel: "Ціну уточнюйте", numberLocale: "uk-UA" },
+  ru: { fromLabel: "От", onRequestLabel: "Цену уточняйте", numberLocale: "ru-RU" },
+  pl: { fromLabel: "Od", onRequestLabel: "Cena na zapytanie", numberLocale: "pl-PL" },
+};
+
+type ProductWithFromPrice = Pick<Product, "pricingMode" | "fromPrice" | "priceCurrency"> & {
+  pricingMode: "from";
+  fromPrice: number;
+  priceCurrency: NonNullable<Product["priceCurrency"]>;
+};
+
+export function hasProductFromPrice(
+  product: Pick<Product, "pricingMode" | "fromPrice" | "priceCurrency">,
+): product is ProductWithFromPrice {
+  return (
+    product.pricingMode === "from" &&
+    product.fromPrice !== null &&
+    product.fromPrice > 0 &&
+    product.priceCurrency !== null
+  );
+}
+
+export function getProductPriceLabel(product: Product, locale: Locale) {
+  const copy = productPriceCopy[locale];
+
+  if (product.pricingMode === "legacy") {
+    return product.priceLabel || copy.onRequestLabel;
+  }
+
+  if (!hasProductFromPrice(product)) {
+    return copy.onRequestLabel;
+  }
+
+  const formattedPrice = new Intl.NumberFormat(copy.numberLocale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(product.fromPrice);
+  const currencyLabel = product.priceCurrency === "UAH" ? "грн" : product.priceCurrency;
+
+  return `${copy.fromLabel} ${formattedPrice} ${currencyLabel}`;
+}
 
 export type FeedbackTargetType = "product" | "project";
 
@@ -589,10 +639,24 @@ type RawImageLink = {
   image?: StrapiMedia | null;
 };
 
-type RawProduct = Omit<Product, "gallery" | "seo" | "category" | "categories"> & {
+type RawProduct = Omit<
+  Product,
+  | "gallery"
+  | "seo"
+  | "category"
+  | "categories"
+  | "priceLabel"
+  | "pricingMode"
+  | "fromPrice"
+  | "priceCurrency"
+> & {
   gallery?: RawImageLink[];
   seo?: RawSeo | null;
   category?: RawCategory | RawCategory[] | null;
+  priceLabel?: string | null;
+  pricingMode?: "legacy" | "on_request" | "from" | null;
+  fromPrice?: string | number | null;
+  priceCurrency?: string | null;
 };
 
 type RawProject = Omit<Project, "imageUrl" | "gallery" | "usedProducts" | "projectType" | "categories"> & {
@@ -848,9 +912,25 @@ function mapProduct(value: unknown): Product | null {
   }
 
   const categories = mapCategoryCollection(product.category);
+  const parsedFromPrice = Number(product.fromPrice);
+  const fromPrice = Number.isFinite(parsedFromPrice) && parsedFromPrice > 0 ? parsedFromPrice : null;
+  const priceCurrency =
+    product.priceCurrency === "UAH" ||
+    product.priceCurrency === "EUR" ||
+    product.priceCurrency === "USD" ||
+    product.priceCurrency === "PLN"
+      ? product.priceCurrency
+      : null;
 
   return {
     ...product,
+    priceLabel: product.priceLabel?.trim() ?? "",
+    pricingMode:
+      product.pricingMode === "from" || product.pricingMode === "on_request"
+        ? product.pricingMode
+        : "legacy",
+    fromPrice,
+    priceCurrency,
     certifications: Array.isArray(product.certifications)
       ? product.certifications
       : [],
