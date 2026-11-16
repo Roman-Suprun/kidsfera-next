@@ -13,7 +13,7 @@ import {
 } from "@/components/icons";
 import type { Locale } from "@/lib/i18n";
 import { withLocale } from "@/lib/i18n";
-import type { CatalogPage, Category, Product } from "@/lib/strapi";
+import { getProductPriceLabel, type CatalogPage, type Category, type Product } from "@/lib/strapi";
 
 type Props = {
   locale: Locale;
@@ -232,7 +232,7 @@ export function CatalogBrowser({
                   </h3>
                   <div className="mt-5 flex items-center justify-between gap-4">
                     <span className="text-sm font-bold text-[var(--color-primary)]">
-                      {product.priceLabel}
+                      {getProductPriceLabel(product, locale)}
                     </span>
                     <span className="inline-flex items-center gap-1 text-xs text-[var(--color-muted-foreground)] transition-all group-hover:gap-2 group-hover:text-[var(--color-primary)]">
                       {page.viewDetailsLabel}
